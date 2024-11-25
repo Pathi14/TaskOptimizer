@@ -1,11 +1,7 @@
+import { AppRoutingModule } from './app.routing-module';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { TacheModule } from './tache/tache.module';
 
 @Module({
-  imports: [TacheModule],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [AppRoutingModule],
 })
 export class AppModule {}
