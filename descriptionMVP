@@ -1,0 +1,9 @@
+Fonctionnalités:
+
+ - Créer une tâche avec un titre, une description, une date de fin et une date de début
+ - Afficher la liste des tâches
+ - Afficher les détails d'une tâche
+ - Deplacer une tâche suivant les differents status
+ - Supprimer une tâche
+ - Trier les tâches (selon leur priorité, statut, date de fin)
+ - Modifier une tâche
