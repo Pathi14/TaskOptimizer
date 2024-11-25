@@ -89,24 +89,21 @@ Fonctionnalités choisies pour la version initiale du projet :
 
 
 2. **Installez les dépendances** :
-
-  Backend :
   ```bash
+  Backend :
   npm install
 
   Frontend :
-  ```bash
   npm run start
 
 
 3. **Lancez le projet** :
-  Backend :
   ```bash
+  Backend :
   npm install
 
   Frontend :
-   ```bash
-   npm run start
+  npm run start
 
 
 4. **Accédez à l’application dans votre navigateur à l’adresse** :
