@@ -1,0 +1,57 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Utilisateur {
+  id           Int      @id @default(autoincrement())
+  nom          String
+  adresse_mail String   @unique
+  mot_de_passe String
+  taches       Tache[]  @relation("UtilisateurTaches")
+  projets      Projet[]
+}
+
+model Tache {
+  id            Int      @id @default(autoincrement())
+  titre         String
+  description   String
+  projet        Projet   @relation(fields: [projetId], references: [id])
+  projetId      Int
+  date_creation DateTime @default(now())
+  date_echeance DateTime
+  statut        Statut   @relation(fields: [statutId], references: [id])
+  statutId      Int
+  priorite      Int
+  tags          Tag[]
+  sousTaches    Tache[]  @relation("SousTacheRelation")
+  parentTache   Tache?   @relation("SousTacheRelation", fields: [sousTacheId], references: [id])
+  sousTacheId   Int?
+  utilisateur   Utilisateur @relation("UtilisateurTaches", fields: [utilisateurId], references: [id])
+  utilisateurId Int
+}
+
+model Projet {
+  id            Int          @id @default(autoincrement())
+  titre         String
+  description   String
+  utilisateur   Utilisateur  @relation(fields: [utilisateurId], references: [id])
+  utilisateurId Int
+  taches        Tache[]
+}
+
+model Statut {
+  id    Int      @id @default(autoincrement())
+  nom   String
+  taches Tache[]
+}
+
+model Tag {
+  id      Int      @id @default(autoincrement())
+  type_tag String
+  taches   Tache[]
+}
