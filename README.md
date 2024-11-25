@@ -1,99 +1,114 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# TaskOptimizer
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Une application web intuitive et collaborative pour organiser, suivre et gérer vos tâches efficacement.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Description du projet
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+TaskOptimizer est une application web conçue pour simplifier la gestion des tâches et aider les utilisateurs à organiser efficacement leurs projets.  
+Elle propose une interface intuitive et des fonctionnalités pour créer, structurer et suivre les tâches de manière optimale.
 
-## Project setup
+Chaque tâche peut inclure :  
+- Un **titre** et une **description** détaillée.  
+- Un **projet d’appartenance**.  
+- Une **date de création** et une **date d’échéance**.  
+- Une **priorité**, un **statut**, et des **tags**.  
+- Une possibilité de **décomposition en sous-tâches** avec une hiérarchie sans limite.
 
-```bash
-$ npm install
-```
+---
 
-## Compile and run the project
+## Fonctionnalités principales finales
 
-```bash
-# development
-$ npm run start
+- **Création de tâches** :  
+  Les utilisateurs peuvent créer des tâches en ajoutant un titre, une description, une priorité, une échéance, des tags et d’autres informations pertinentes.
 
-# watch mode
-$ npm run start:dev
+- **Organisation des tâches** :  
+  Les tâches peuvent être affichées et classées par projet, par liste, par tag ou par date d’échéance.
 
-# production mode
-$ npm run start:prod
-```
+- **Mise à jour et suppression** :  
+  Les utilisateurs peuvent modifier ou supprimer les informations associées à une tâche.
 
-## Run tests
+- **Attribution des tâches** :  
+  Les tâches peuvent être assignées à d’autres utilisateurs pour faciliter la gestion collaborative.
 
-```bash
-# unit tests
-$ npm run test
+- **Suivi de l’avancement** :  
+  Chaque tâche dispose d’un statut évolutif (par exemple : "À faire", "En cours", "Terminée").
 
-# e2e tests
-$ npm run test:e2e
+- **Notifications** :  
+  Les utilisateurs reçoivent des notifications (notamment par email via [Ethereal](https://ethereal.email/)) lorsqu’une tâche leur est attribuée, modifiée, ou qu’une échéance approche.
 
-# test coverage
-$ npm run test:cov
-```
+- **Collaboration en temps réel** :  
+  L’application permet aux utilisateurs de travailler simultanément sur des tâches partagées pour améliorer la collaboration en équipe.
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## MVP du projet
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Fonctionnalités choisies pour la version initiale du projet :
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+ - Créer une tâche avec un titre, une description, une date de fin et une date de début
+ - Afficher la liste des tâches
+ - Afficher les détails d'une tâche
+ - Deplacer une tâche suivant les differents status
+ - Supprimer une tâche
+ - Trier les tâches (selon leur priorité, statut, date de fin)
+ - Modifier une tâche
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Technologies utilisées
 
-Check out a few resources that may come in handy when working with NestJS:
+### **Backend**  
+- [NestJS](https://nestjs.com) : Framework backend pour la création d’API performantes et modulaires.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### **Frontend**  
+- [React](https://reactjs.org) avec [Next.js](https://nextjs.org) : Framework frontend pour des interfaces dynamiques et performantes.
 
-## Support
+### **Base de données**  
+- [SQLite](https://sqlite.org) : Base de données légère et intégrée.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### **Modélisation de la base de données**  
+- [DB Designer](https://www.dbdesigner.net) : Outil en ligne pour la création de MCD (Modèle Conceptuel de Données).
 
-## Stay in touch
+### **Éditeur de code**  
+- [Visual Studio Code](https://code.visualstudio.com) : Éditeur de code puissant et extensible.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### **Collaboration**  
+- [GitHub](https://github.com) : Hébergement du code source et gestion des versions.  
+- [GitHub Projects](https://github.com/features/issues) : Organisation des tâches et gestion de projet.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Installation et utilisation
+
+1. **Clonez le repository** :
+  ```bash
+  git clone https://github.com/Pathi14/TaskOptimizer.git
+  cd TaskOptimizer
+
+
+2. **Installez les dépendances** :
+
+  Backend :
+  ```bash
+  npm install
+
+  Frontend :
+  ```bash
+  npm run start
+
+
+3. **Lancez le projet** :
+  Backend :
+  ```bash
+  npm install
+
+  Frontend :
+   ```bash
+   npm run start
+
+
+4. **Accédez à l’application dans votre navigateur à l’adresse** :
+   ```bash
+    http://localhost:3000
