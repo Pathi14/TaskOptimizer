@@ -13,7 +13,7 @@ model Utilisateur {
   adresse_mail String   @unique
   mot_de_passe String
   taches       Tache[]  @relation("UtilisateurTaches")
-  projets      Projet[]
+  projets      Projet[] @relation("UtilisateurProjets")
 }
 
 model Tache {
@@ -38,9 +38,8 @@ model Tache {
 model Projet {
   id            Int          @id @default(autoincrement())
   titre         String
-  description   String
-  utilisateur   Utilisateur  @relation(fields: [utilisateurId], references: [id])
-  utilisateurId Int
+  description   String?
+  utilisateurs   Utilisateur[] @relation("UtilisateurProjets")
   taches        Tache[]
 }
 
