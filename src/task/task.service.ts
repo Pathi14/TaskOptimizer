@@ -12,20 +12,20 @@ export class TaskService {
         description?: string, 
         date_echeance?:Date, 
         priorite?: number, 
-        projetId: number, 
-        statutId: number}): Promise<void> {
+        projectId: number, 
+        statusId: number}): Promise<void> {
         
-        if(data.projetId){
-            const existProject = this.verifExistenceProject(data.projetId);
+        if(data.projectId){
+            const existProject = this.verifExistenceProject(data.projectId);
             if (!existProject) {
-                throw new Error(`Projet id ${data.projetId} invalid`);
+                throw new Error(`Projet id ${data.projectId} invalid`);
             }
         }
 
-        if(data.statutId){
-            const existStatus = this.verifyExistenceStatus(data.statutId);
+        if(data.statusId){
+            const existStatus = this.verifyExistenceStatus(data.statusId);
             if (!existStatus) {
-                throw new Error(`Status id ${data.statutId} invalid`);
+                throw new Error(`Status id ${data.statusId} invalid`);
             }
         }
 
@@ -35,11 +35,11 @@ export class TaskService {
                 description: data.description,
                 date_echeance: data.date_echeance,
                 priorite: data.priorite,
-                projet: data.projetId
-                  ? { connect: { id: data.projetId } }
+                projet: data.projectId
+                  ? { connect: { id: data.projectId } }
                   : undefined, 
-                statut: data.statutId
-                  ? { connect: { id: data.statutId } }
+                statut: data.statusId
+                  ? { connect: { id: data.statusId } }
                   : undefined,
             },
         });
