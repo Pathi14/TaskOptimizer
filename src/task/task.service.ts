@@ -7,29 +7,110 @@ export class TaskService {
     
     constructor(private prisma: PrismaService) {}
     
-    async addTask(data : {titre: string, description: string, date_echeance:Date, priorite: number, projetId?: number | null, utilisateurId?: number | null}): Promise<void> {
+    async addTask(data : {
+        titre: string, 
+        description: string, 
+        date_echeance:Date, 
+        priorite: number, 
+        projetId?: number | null, 
+        utilisateurId?: number | null, 
+        statutId?: number | null}): Promise<void> {
         
-        const existProject = this.verifExistenceProject(data.projetId);
-        if (!existProject) {
-            throw new Error(`Projet id ${data.projetId} inconnu`);
+        if(data.projetId){
+            const existProject = this.verifExistenceProject(data.projetId);
+            if (!existProject) {
+                throw new Error(`Projet id ${data.projetId} invalid`);
+            }
         }
 
-        const existUser = this.verifExistenceUser(data.utilisateurId);
-        if (!existUser) {
-            throw new Error(`Utilisateur id ${data.utilisateurId} inconnu`);
+        if(data.utilisateurId){
+            const existUser = this.verifExistenceUser(data.utilisateurId);
+            if (!existUser) {
+                throw new Error(`Utilisateur id ${data.utilisateurId} invalid`);
+            }
+        }
+
+        if(data.statutId){
+            const existStatus = this.verifyExistenceStatus(data.utilisateurId);
+            if (!existStatus) {
+                throw new Error(`Status id ${data.utilisateurId} invalid`);
+            }
         }
 
         await this.prisma.tache.create({
-            data,
+            data: {
+                titre: data.titre,
+                description: data.description,
+                date_echeance: data.date_echeance,
+                priorite: data.priorite,
+                projet: data.projetId
+                  ? { connect: { id: data.projetId } }
+                  : undefined, 
+                utilisateur: data.utilisateurId
+                  ? { connect: { id: data.utilisateurId } }
+                  : undefined, 
+                statut: data.statutId
+                  ? { connect: { id: data.statutId } }
+                  : undefined,
+            },
         });
     }
-    
-    async updateTask(id: number, data: { titre?: string; description?: string; date_echeance?: Date; priorite?: number, projetId?: number | null, utilisateurId?: number | null }): Promise<Tache> {
+
+    async updateTask(
+        id: number,
+        data: {
+          titre?: string;
+          description?: string;
+          date_echeance?: Date;
+          priorite?: number;
+          projetId?: number | null;
+          utilisateurId?: number | null;
+          statutId?: number | null;
+        }
+      ): Promise<Tache> {
+        if(data.projetId){
+            const existProject = this.verifExistenceProject(data.projetId);
+            if (!existProject) {
+                throw new Error(`Projet id ${data.projetId} invalid`);
+            }
+        }
+
+        if(data.utilisateurId){
+            const existUser = this.verifExistenceUser(data.utilisateurId);
+            if (!existUser) {
+                throw new Error(`Utilisateur id ${data.utilisateurId} invalid`);
+            }
+        }
+
+        if(data.statutId){
+            const existStatus = this.verifyExistenceStatus(data.utilisateurId);
+            if (!existStatus) {
+                throw new Error(`Status id ${data.utilisateurId} invalid`);
+            }
+        }
+
         return this.prisma.tache.update({
-            where: { id }, 
-            data,
+          where: {
+            id: id, 
+          },
+          data: {
+            titre: data.titre,
+            description: data.description,
+            date_echeance: data.date_echeance,
+            priorite: data.priorite,
+            projet: data.projetId
+              ? { connect: { id: data.projetId } }
+              : undefined, 
+            utilisateur: data.utilisateurId
+              ? { connect: { id: data.utilisateurId } }
+              : undefined, 
+            statut: data.statutId
+              ? { connect: { id: data.statutId } }
+              : undefined,
+          },
         });
-    }
+      }
+      
     
     async getTasks(): Promise<Tache[]> {
         return this.prisma.tache.findMany();
@@ -47,18 +128,28 @@ export class TaskService {
         });
     }
 
-    async verifExistenceProject(projetId: number): Promise<boolean> {
+    async verifExistenceProject(projetId?: number | null): Promise<boolean> {
+        if (!projetId) return false; // Si l'ID est invalide, on retourne `false`
         const projet = await this.prisma.projet.findUnique({
-            where: { id: projetId },
+          where: { id: projetId },
         });
         return !!projet;
-    }
-
-    
-    async verifExistenceUser(utilisateurId: number) {
+      }
+      
+      async verifExistenceUser(utilisateurId?: number | null): Promise<boolean> {
+        if (!utilisateurId) return false;
         const utilisateur = await this.prisma.utilisateur.findUnique({
-            where: { id: utilisateurId},
-        })
+          where: { id: utilisateurId },
+        });
         return !!utilisateur;
-    }
+      }
+      
+      async verifyExistenceStatus(statutId?: number | null): Promise<boolean> {
+        if (!statutId) return false;
+        const status = await this.prisma.statut.findUnique({
+          where: { id: statutId },
+        });
+        return !!status;
+      }
+      
 }

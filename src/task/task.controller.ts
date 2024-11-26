@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Tache } from '@prisma/client';
 import { CreateTaskDto } from './task.dto';
@@ -11,6 +11,9 @@ export class TaskController {
     async createTask(
     @Body() body: CreateTaskDto
     ) {
+        if (!body.titre) {
+            throw new BadRequestException('Missing required fields');
+        }
         return this.taskService.addTask(body);
     }
 
@@ -22,8 +25,11 @@ export class TaskController {
     @Put(':id')
     async updateTask(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projetId?: number | null, utilisateurId?: number | null },
+        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projectId?: number | null, utilisateurId?: number | null, statutId?: number | null },
     ): Promise<Tache> {
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
         return this.taskService.updateTask(id, body);
     }
 
