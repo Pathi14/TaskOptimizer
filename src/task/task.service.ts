@@ -3,19 +3,19 @@ import { Tache } from '@prisma/client';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
-export class TacheService {
+export class TaskService {
     
     constructor(private prisma: PrismaService) {}
     
-    async addTache(data : {titre: string, description: string, date_echeance:Date, priorite: number, projetId?: number | null, utilisateurId?: number | null}): Promise<void> {
+    async addTask(data : {titre: string, description: string, date_echeance:Date, priorite: number, projetId?: number | null, utilisateurId?: number | null}): Promise<void> {
         
-        const existProjet = this.verifExistenceProjet(data.projetId);
-        if (!existProjet) {
+        const existProject = this.verifExistenceProject(data.projetId);
+        if (!existProject) {
             throw new Error(`Projet id ${data.projetId} inconnu`);
         }
 
-        const existUtilisateur = this.verifExistenceUtilisateur(data.utilisateurId);
-        if (!existUtilisateur) {
+        const existUser = this.verifExistenceUser(data.utilisateurId);
+        if (!existUser) {
             throw new Error(`Utilisateur id ${data.utilisateurId} inconnu`);
         }
 
@@ -24,30 +24,30 @@ export class TacheService {
         });
     }
     
-    async updateTache(id: number, data: { titre?: string; description?: string; date_echeance?: Date; priorite?: number, projetId?: number | null, utilisateurId?: number | null }): Promise<Tache> {
+    async updateTask(id: number, data: { titre?: string; description?: string; date_echeance?: Date; priorite?: number, projetId?: number | null, utilisateurId?: number | null }): Promise<Tache> {
         return this.prisma.tache.update({
             where: { id }, 
             data,
         });
     }
     
-    async getTaches(): Promise<Tache[]> {
+    async getTasks(): Promise<Tache[]> {
         return this.prisma.tache.findMany();
     }
 
-    async deleteTache(id: number): Promise<void>{
+    async deleteTask(id: number): Promise<void>{
         await this.prisma.tache.delete({
             where: {id},
         });
     }
 
-    async getTacheById(id: number): Promise<Tache> {
+    async getTaskById(id: number): Promise<Tache> {
         return this.prisma.tache.findUnique({
             where: { id },
         });
     }
 
-    async verifExistenceProjet(projetId: number): Promise<boolean> {
+    async verifExistenceProject(projetId: number): Promise<boolean> {
         const projet = await this.prisma.projet.findUnique({
             where: { id: projetId },
         });
@@ -55,7 +55,7 @@ export class TacheService {
     }
 
     
-    async verifExistenceUtilisateur(utilisateurId: number) {
+    async verifExistenceUser(utilisateurId: number) {
         const utilisateur = await this.prisma.utilisateur.findUnique({
             where: { id: utilisateurId},
         })
