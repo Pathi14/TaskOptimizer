@@ -7,27 +7,24 @@ export class TacheService {
     
     constructor(private prisma: PrismaService) {}
     
-    async addTache(titre: string, description: string, date_echeance:Date, priorite: number, projetId?: number | null, userId?: number | null): Promise<void> {
+    async addTache(data : {titre: string, description: string, date_echeance:Date, priorite: number, projetId?: number | null, utilisateurId?: number | null}): Promise<void> {
         
-        const existProjet = this.verifExistenceProjet(projetId);
+        const existProjet = this.verifExistenceProjet(data.projetId);
         if (!existProjet) {
-            throw new Error(`Projet id ${projetId} inconnu`);
+            throw new Error(`Projet id ${data.projetId} inconnu`);
+        }
+
+        const existUtilisateur = this.verifExistenceUtilisateur(data.utilisateurId);
+        if (!existUtilisateur) {
+            throw new Error(`Utilisateur id ${data.utilisateurId} inconnu`);
         }
 
         await this.prisma.tache.create({
-            data: {
-                titre,
-                description: description,
-                date_echeance: date_echeance,
-                priorite,  
-                projetId: projetId ?  projetId : null,
-                statutId: null,
-                utilisateurId: null,         
-            },
+            data,
         });
     }
     
-    async updateTache(id: number, data: { titre?: string; description?: string; date_echeance?: Date; priorite?: number, projetId?: number | null, userId?: number | null }): Promise<Tache> {
+    async updateTache(id: number, data: { titre?: string; description?: string; date_echeance?: Date; priorite?: number, projetId?: number | null, utilisateurId?: number | null }): Promise<Tache> {
         return this.prisma.tache.update({
             where: { id }, 
             data,
@@ -55,5 +52,13 @@ export class TacheService {
             where: { id: projetId },
         });
         return !!projet;
+    }
+
+    
+    async verifExistenceUtilisateur(utilisateurId: number) {
+        const utilisateur = await this.prisma.utilisateur.findUnique({
+            where: { id: utilisateurId},
+        })
+        return !!utilisateur;
     }
 }

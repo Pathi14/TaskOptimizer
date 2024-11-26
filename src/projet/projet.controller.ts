@@ -9,10 +9,9 @@ export class ProjetController {
 
     @Post()
     async createProjet(
-    @Body() body: { titre: string; description: string }
+    @Body() body: { titre: string; description: string; utilisateur_id?: number }
     ) {
-        const { titre, description } = body;
-        return this.projetService.addProjet(titre, description);
+        return this.projetService.addProjet(body);
     }
 
     @Get()
@@ -23,7 +22,7 @@ export class ProjetController {
     @Put(':id')
     async updateProjet(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: { titre?: string; description?: string },
+        @Body() body: { titre: string; description?: string; utilisateur_id?: number },
     ): Promise<Projet> {
         return this.projetService.updateProjet(id, body);
     }
@@ -36,5 +35,13 @@ export class ProjetController {
     @Get(':id')
     async getProjetbyId(@Param('id', ParseIntPipe) id: number): Promise<Projet> {
         return this.projetService.getProjetbyId(id);
+    }
+
+    @Put('/utilisateur/:idProjet')
+    async addUtilisateurProjet(
+        @Param('idProjet', ParseIntPipe) idProjet: number,
+        @Body() body: { utilisateurIds: number[] }
+    ): Promise<void>{
+        await this.projetService.addUtilisateurProjet(idProjet, body.utilisateurIds);
     }
 }

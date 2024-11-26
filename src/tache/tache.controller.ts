@@ -8,10 +8,9 @@ export class TacheController {
 
     @Post()
     async createTache(
-    @Body() body: { titre: string; description: string; date_echeance: Date; priorite: number; projetId?: number | null; userId?: number | null }
+    @Body() body: { titre: string; description: string; date_echeance: Date; priorite: number; projetId?: number | null; utilisateurId?: number | null }
     ) {
-        const { titre, description, date_echeance, priorite, projetId, userId } = body;
-        return this.tacheService.addTache(titre, description, date_echeance, priorite, projetId, userId);
+        return this.tacheService.addTache(body);
     }
 
     @Get()
@@ -22,7 +21,7 @@ export class TacheController {
     @Put(':id')
     async updateTache(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projetId?: number | null, userId?: number | null },
+        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projetId?: number | null, utilisateurId?: number | null },
     ): Promise<Tache> {
         return this.tacheService.updateTache(id, body);
     }
