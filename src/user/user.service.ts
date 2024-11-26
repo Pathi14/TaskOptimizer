@@ -51,9 +51,23 @@ export class UserService {
     });
   }
 
-  async deleteUser(id: number): Promise<Utilisateur> {
-    return this.prisma.utilisateur.delete({
+  async deleteUser(id: number): Promise<void> {
+    if(id){
+      const existTask = this.verifyExistenceUser(id);
+      if (!existTask) {
+          throw new Error(`Task id ${id} invalid`);
+      }
+    }
+    await this.prisma.utilisateur.delete({
       where: { id },
     });
+  }
+
+  async verifyExistenceUser(id?: number | null): Promise<boolean> {
+    if (!id) return false;
+    const user = await this.prisma.utilisateur.findUnique({
+      where: { id },
+    });
+    return !!user;
   }
 }

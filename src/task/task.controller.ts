@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Tache } from '@prisma/client';
 import { CreateTaskDto } from './task.dto';
@@ -11,10 +11,19 @@ export class TaskController {
     async createTask(
     @Body() body: CreateTaskDto
     ) {
-        if (!body.titre) {
+        if (!body.titre || !body.statutId || !body.projetId) {
             throw new BadRequestException('Missing required fields');
         }
-        return this.taskService.addTask(body);
+
+        try {
+            await this.taskService.addTask(body);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
     }
 
     @Get()
@@ -25,17 +34,40 @@ export class TaskController {
     @Put(':id')
     async updateTask(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projectId?: number | null, utilisateurId?: number | null, statutId?: number | null },
+        @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projectId?: number | null, statutId?: number | null },
     ): Promise<Tache> {
+        if(id === undefined || id === null){
+            throw new BadRequestException('Missing required fields');
+        }
         if (!body) {
             throw new BadRequestException('None value to update');
         }
-        return this.taskService.updateTask(id, body);
+
+        try {
+            return this.taskService.updateTask(id, body);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
     }
 
     @Delete(':id')
-    async deleteTask(@Param('id', ParseIntPipe) id: number): Promise<void> {
-        await this.taskService.deleteTask(id);
+    async deleteTask(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+        if(id === undefined || id === null){
+            throw new BadRequestException('Missing required fields');
+        }
+
+        try {
+            await this.taskService.deleteTask(id);
+            return { message: `Task with ID ${id} has been deleted successfully.` };
+        } catch (error) {
+            if (error.message.includes('not found')) {
+                throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+            }
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Get(':id')
