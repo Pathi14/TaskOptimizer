@@ -14,9 +14,12 @@ export class CreateTaskDto {
   @IsNumber()
   @Max(3)
   priorite: number;
+
+  @IsNumber()
+  statutId: number;
   
   @IsNumber()
-  projet_id: number;
+  projectId: number;
 
   @IsNumber()
   utilisateurId: number;

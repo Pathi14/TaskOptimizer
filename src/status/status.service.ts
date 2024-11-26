@@ -3,16 +3,16 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { Statut, Prisma } from '@prisma/client';
 
 @Injectable()
-export class StatutService {
+export class StatusService {
   constructor(private prisma: PrismaService) {}
 
-  async createStatut(data: Prisma.StatutCreateInput): Promise<Statut> {
+  async createStatus(data: Prisma.StatutCreateInput): Promise<Statut> {
     return this.prisma.statut.create({
       data,
     });
   }
 
-  async getStatut(id: number): Promise<Statut | null> {
+  async getStatusById(id: number): Promise<Statut | null> {
     return this.prisma.statut.findUnique({
       where: { id },
       include: {
@@ -21,7 +21,7 @@ export class StatutService {
     });
   }
 
-  async getStatuts(): Promise<Statut[]> {
+  async getStatus(): Promise<Statut[]> {
     return this.prisma.statut.findMany({
       include: {
         taches: true,
@@ -29,14 +29,14 @@ export class StatutService {
     });
   }
 
-  async updateStatut(id: number, data: Prisma.StatutUpdateInput): Promise<Statut> {
+  async updateStatus(id: number, data: Prisma.StatutUpdateInput): Promise<Statut> {
     return this.prisma.statut.update({
       where: { id },
       data,
     });
   }
 
-  async deleteStatut(id: number): Promise<Statut> {
+  async deleteStatus(id: number): Promise<Statut> {
     return this.prisma.statut.delete({
       where: { id },
     });
