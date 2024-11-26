@@ -6,9 +6,20 @@ import { Statut, Prisma } from '@prisma/client';
 export class StatusService {
   constructor(private prisma: PrismaService) {}
 
-  async createStatus(data: Prisma.StatutCreateInput): Promise<Statut> {
+  async createStatus(data: {nom: string, projectId: number}): Promise<Statut> {
+    if(data.projectId){
+      const existProject = this.verifExistenceProject(data.projectId);
+      if (!existProject) {
+          throw new Error(`Projet id ${data.projectId} invalid`);
+      }
+    }
     return this.prisma.statut.create({
-      data,
+      data:{
+        nom: data.nom,
+        projet: data.projectId
+              ? { connect: { id: data.projectId } }
+              : undefined,
+      },
     });
   }
 
@@ -40,5 +51,13 @@ export class StatusService {
     return this.prisma.statut.delete({
       where: { id },
     });
+  }
+
+  async verifExistenceProject(projetId?: number | null): Promise<boolean> {
+    if (!projetId) return false; 
+    const projet = await this.prisma.projet.findUnique({
+      where: { id: projetId },
+    });
+    return !!projet;
   }
 }

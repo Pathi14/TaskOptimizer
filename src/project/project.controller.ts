@@ -1,24 +1,35 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { Prisma, Projet } from '@prisma/client';
 import { CreateProjectDto } from './project.dto';
-import { create } from 'domain';
 
 @Controller()
 export class ProjetController {
 
-    constructor(private readonly projetService: ProjectService) {}
+    constructor(private readonly projectService: ProjectService) {}
 
     @Post()
     async createProject(
     @Body() createProjectDto: CreateProjectDto
     ) {
-        return this.projetService.addProject(createProjectDto);
+        if (!createProjectDto.titre) {
+            throw new BadRequestException('Missing required fields');
+        }
+
+        try {
+            return this.projectService.addProject(createProjectDto);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
     }
 
     @Get()
     async getProjects(): Promise<Projet[]> {
-        return this.projetService.getProjects();
+        return this.projectService.getProjects();
     }
     
     @Put(':id')
@@ -26,17 +37,44 @@ export class ProjetController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: Prisma.ProjetUpdateInput,
     ): Promise<Projet> {
-        return this.projetService.updateProject(id, body);
+        if(id === undefined || id === null){
+            throw new BadRequestException('Missing required fields');
+        }
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
+
+        try {
+            return this.projectService.updateProject(id, body);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
     }
 
     @Delete(':id')
-    async deleteProject(@Param('id', ParseIntPipe) id: number): Promise<void> {
-        await this.projetService.deleteProject(id);
+    async deleteProject(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+        if(id === undefined || id === null){
+            throw new BadRequestException('Missing required fields');
+        }
+
+        try {
+            await this.projectService.deleteProject(id);
+            return { message: `Task with ID ${id} has been deleted successfully.` };
+        } catch (error) {
+            if (error.message.includes('not found')) {
+                throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+            }
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Get(':id')
     async getProjectbyId(@Param('id', ParseIntPipe) id: number): Promise<Projet> {
-        return this.projetService.getProjectbyId(id);
+        return this.projectService.getProjectbyId(id);
     }
 
     @Put('/users/:idProject')
@@ -44,6 +82,21 @@ export class ProjetController {
         @Param('idProject', ParseIntPipe) idProject: number,
         @Body() body: { utilisateurIds: number[] }
     ): Promise<void>{
-        await this.projetService.addUsersToProject(idProject, body.utilisateurIds);
+        if(idProject === undefined || idProject === null){
+            throw new BadRequestException('Missing required fields');
+        }
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
+
+        try {
+            await this.projectService.addUsersToProject(idProject, body.utilisateurIds);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
     }
 }
