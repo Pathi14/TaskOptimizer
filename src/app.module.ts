@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { PrismaService } from './infrastructure/prisma/prisma.service';
-import { StatutModule } from './statut/statut.module';
+import { StatusModule } from './status/status.module';
 import { TagModule } from './tag/tag.module';
 import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
@@ -12,7 +12,7 @@ import { ProjectModule } from './project/project.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UserModule, StatutModule, TagModule , TaskModule, ProjectModule
+    UserModule, StatusModule, TagModule , TaskModule, ProjectModule
   ],
   providers: [PrismaService],
 })
