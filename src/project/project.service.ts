@@ -24,6 +24,14 @@ export class ProjectService {
     }
 
     async deleteProject(id: number): Promise<void>{
+
+        if(id){
+            const existTask = this.verifExistenceProject(id);
+            if (!existTask) {
+                throw new Error(`Task id ${id} invalid`);
+            }
+        }
+
         await this.prisma.projet.delete({
             where: {id},
         });
@@ -49,4 +57,12 @@ export class ProjectService {
             },
         });
     }
+
+    async verifExistenceProject(projetId?: number | null): Promise<boolean> {
+        if (!projetId) return false; 
+        const projet = await this.prisma.projet.findUnique({
+          where: { id: projetId },
+        });
+        return !!projet;
+      }
 }

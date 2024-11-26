@@ -20,18 +20,18 @@ model Tache {
   id            Int      @id @default(autoincrement())
   titre         String
   description   String?
-  projet        Projet?   @relation(fields: [projetId], references: [id])
-  projetId      Int?
+  projet        Projet   @relation(fields: [projetId], references: [id])
+  projetId      Int
   date_creation DateTime @default(now())
-  date_echeance DateTime
-  statut        Statut?   @relation(fields: [statutId], references: [id])
-  statutId      Int?
-  priorite      Int
+  date_echeance DateTime?
+  statut        Statut   @relation(fields: [statutId], references: [id])
+  statutId      Int
+  priorite      Int?
   tags          Tag[]
   sousTaches    Tache[]  @relation("SousTacheRelation")
   parentTache   Tache?   @relation("SousTacheRelation", fields: [sousTacheId], references: [id])
   sousTacheId   Int?
-  utilisateur   Utilisateur? @relation("UtilisateurTaches", fields: [utilisateurId], references: [id])
+  utilisateurs   Utilisateur[] @relation("UtilisateurTaches")
   utilisateurId Int?
 }
 
@@ -41,12 +41,15 @@ model Projet {
   description   String?
   utilisateurs   Utilisateur[] @relation("UtilisateurProjets")
   taches        Tache[]
+  statuts Statut[]
 }
 
 model Statut {
   id    Int      @id @default(autoincrement())
   nom   String
   taches Tache[]
+  projet        Projet   @relation(fields: [projetId], references: [id])
+  projetId      Int
 }
 
 model Tag {
