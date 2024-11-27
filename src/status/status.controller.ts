@@ -34,9 +34,9 @@ export class StatutController {
     return this.statusService.getStatusById(Number(id));
   }
 
-  @Get()
-  async getStatus(): Promise<Statut[]> {
-    return this.statusService.getStatus();
+  @Get('project/:id')
+  async getStatusByProjectId(@Param('id') id: number): Promise<Statut[]> {
+    return this.statusService.getStatusByProjectId(Number(id));
   }
 
   @Put(':id')

@@ -30,9 +30,9 @@ export class ProjectService {
     async deleteProject(id: number): Promise<void>{
 
         if(id){
-            const existTask = this.verifExistenceProject(id);
-            if (!existTask) {
-                throw new Error(`Task id ${id} invalid`);
+            const existProjet = this.verifExistenceProject(id);
+            if (!existProjet) {
+                throw new Error(`Projet id ${id} invalid`);
             }
         }
 
@@ -47,26 +47,84 @@ export class ProjectService {
         });
     }
 
-    async addUsersToProject(projectId: number, utilisateurIds: number[]): Promise<void> {
-        if (!utilisateurIds || utilisateurIds.length === 0) {
-            throw new Error('Aucun utilisateur à ajouter.');
+    async addUsersToProject(projectId: number, userIds: number[]): Promise<void> {
+
+        if(projectId){
+            const existProjet = this.verifExistenceProject(projectId);
+            if (!existProjet) {
+                throw new Error(`Projet id ${projectId} invalid`);
+            }
         }
 
-        await this.prisma.projet.update({
-            where: { id: projectId },
-            data: {
-                utilisateurs: {
-                    connect: utilisateurIds.map((id) => ({ id })),
-                },
+        for (const userId of userIds) {
+            await this.checkUserExists(userId);
+            const alreadyAssociated = await this.checkUserProjectAssociation(projectId, userId);
+            if (alreadyAssociated) {
+                throw new Error(`User with ID ${userId} already has association with project with ID ${projectId}`);
+            }
+        }
+
+        await Promise.all(
+            userIds.map((utilisateurId) =>
+                this.prisma.associer.create({
+                    data: {
+                        id_utilisateur: utilisateurId,
+                        id_projet: projectId,
+                    },
+                })
+            )
+        );
+    }
+
+    async removeUserFromProject(projectId: number, userId: number): Promise<void> {
+        
+        if(projectId){
+            const existProjet = this.verifExistenceProject(projectId);
+            if (!existProjet) {
+                throw new Error(`Projet id ${projectId} invalid`);
+            }
+        }
+
+        await this.checkUserExists(userId);
+        const associationExists = await this.checkUserProjectAssociation(projectId, userId);
+        if (!associationExists) {
+            throw new Error(
+                `User with ID ${userId} doesn't have association with project with ID ${projectId}`
+            );
+        }
+    
+        await this.prisma.associer.deleteMany({
+            where: {
+                id_projet: projectId,
+                id_utilisateur: userId,
             },
         });
     }
+    
 
-    async verifExistenceProject(projetId?: number | null): Promise<boolean> {
+    private async verifExistenceProject(projetId?: number | null): Promise<boolean> {
         if (!projetId) return false; 
         const projet = await this.prisma.projet.findUnique({
           where: { id: projetId },
         });
         return !!projet;
-      }
+    }
+
+    private async checkUserExists(userId: number): Promise<void> {
+        const userExists = await this.prisma.utilisateur.findUnique({
+            where: { id: userId },
+        });
+        if (!userExists) {
+            throw new Error(`User with'ID ${userId} doesn't exist`);
+        }
+    }
+
+    private async checkUserProjectAssociation(projectId: number, userId: number): Promise<boolean> {
+        const associationExists = await this.prisma.associer.findFirst({
+            where: {
+                id_projet: projectId,
+                id_utilisateur: userId,
+            },
+        });
+        return !!associationExists;    }
 }
