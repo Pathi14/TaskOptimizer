@@ -1,11 +1,14 @@
-import { Injectable ,  ConflictException, BadRequestException} from '@nestjs/common';
+import { Injectable ,  ConflictException , UnauthorizedException , BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { Utilisateur, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { AuthDto } from 'src/authentification/auth.dto';
+
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
   async createUser(data: Prisma.UtilisateurCreateInput): Promise<Utilisateur> {
     const existingUser = await this.prisma.utilisateur.findUnique({
@@ -69,5 +72,20 @@ export class UserService {
       where: { id },
     });
     return !!user;
+  }  
+  async authenticateUser(authDto: AuthDto): Promise<{ accessToken: string }> {
+    const { adresse_mail, mot_de_passe } = authDto;
+    const user = await this.prisma.utilisateur.findUnique({
+      where: { adresse_mail },
+    });
+ 
+    if (!user || !(await bcrypt.compare(mot_de_passe, user.mot_de_passe))) {
+      throw new UnauthorizedException('Adresse e-mail ou mot de passe incorrect');
+    }
+ 
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+ 
+    return { accessToken };
   }
 }
