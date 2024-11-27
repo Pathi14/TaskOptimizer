@@ -37,9 +37,6 @@ export class ProjetController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: Prisma.ProjetUpdateInput,
     ): Promise<Projet> {
-        if(id === undefined || id === null){
-            throw new BadRequestException('Missing required fields');
-        }
         if (!body) {
             throw new BadRequestException('None value to update');
         }
@@ -80,7 +77,7 @@ export class ProjetController {
     @Put('/users/:idProject')
     async addUsersToProjet(
         @Param('idProject', ParseIntPipe) idProject: number,
-        @Body() body: { utilisateurIds: number[] }
+        @Body() body: { usersIds: number[] }
     ): Promise<void>{
         if(idProject === undefined || idProject === null){
             throw new BadRequestException('Missing required fields');
@@ -90,7 +87,7 @@ export class ProjetController {
         }
 
         try {
-            await this.projectService.addUsersToProject(idProject, body.utilisateurIds);
+            await this.projectService.addUsersToProject(idProject, body.usersIds);
         } catch (error) {
             if (error instanceof BadRequestException || error instanceof ConflictException) {
                 throw error;

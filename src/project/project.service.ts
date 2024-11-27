@@ -20,7 +20,11 @@ export class ProjectService {
     }
     
     async getProjects(): Promise<Projet[]> {
-        return this.prisma.projet.findMany();
+        return this.prisma.projet.findMany({
+            include: {
+                statuts: true,
+            },
+        });
     }
 
     async deleteProject(id: number): Promise<void>{
