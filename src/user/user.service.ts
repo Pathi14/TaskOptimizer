@@ -1,4 +1,4 @@
-import { Injectable ,  ConflictException , UnauthorizedException} from '@nestjs/common';
+import { Injectable ,  ConflictException , UnauthorizedException , BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { Utilisateur, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -22,9 +22,9 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(data.mot_de_passe, 10);
     data.mot_de_passe = hashedPassword;
 
-    return this.prisma.utilisateur.create({
-      data,
-    });
+      return this.prisma.utilisateur.create({
+        data,
+      });
   }
 
 
@@ -46,12 +46,12 @@ export class UserService {
       },
     });
   }
-
+  
   async updateUser(id: number, data: Prisma.UtilisateurUpdateInput): Promise<Utilisateur> {
-    return this.prisma.utilisateur.update({
-      where: { id },
-      data,
-    });
+      return this.prisma.utilisateur.update({
+        where: { id },
+        data,
+      });
   }
 
   async deleteUser(id: number): Promise<void> {
