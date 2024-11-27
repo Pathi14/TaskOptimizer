@@ -11,7 +11,7 @@ export class TaskController {
     async createTask(
     @Body() body: CreateTaskDto
     ) {
-        if (!body.titre || !body.statusId || !body.projectId) {
+        if (!body.titre || !body.statusId ) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -26,9 +26,9 @@ export class TaskController {
         
     }
 
-    @Get()
-    async getTask(): Promise<Tache[]> {
-        return this.taskService.getTasks();
+    @Get('status/:id')
+    async getStatusByProjectId(@Param('id') id: number): Promise<Tache[]> {
+        return this.taskService.getTacheByProjectId(Number(id));
     }
     
     @Put(':id')

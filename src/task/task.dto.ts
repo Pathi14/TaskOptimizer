@@ -15,12 +15,12 @@ export class CreateTaskDto {
   @Max(3)
   priorite: number;
 
+  @IsNumber()
+  @Max(10)
+  evolution: number;
+
   @IsNotEmpty()
   @IsNumber()
   statusId: number;
-  
-  @IsNotEmpty()
-  @IsNumber()
-  projectId: number;
 
 }
