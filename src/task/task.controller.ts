@@ -11,7 +11,7 @@ export class TaskController {
     async createTask(
     @Body() body: CreateTaskDto
     ) {
-        if (!body.titre || !body.statutId || !body.projetId) {
+        if (!body.titre || !body.statusId || !body.projectId) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -36,9 +36,6 @@ export class TaskController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: { titre?: string; description?: string; date_echeance?: Date; priorite?: number; projectId?: number | null, statutId?: number | null },
     ): Promise<Tache> {
-        if(id === undefined || id === null){
-            throw new BadRequestException('Missing required fields');
-        }
         if (!body) {
             throw new BadRequestException('None value to update');
         }

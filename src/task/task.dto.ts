@@ -17,10 +17,10 @@ export class CreateTaskDto {
 
   @IsNotEmpty()
   @IsNumber()
-  statutId: number;
+  statusId: number;
   
   @IsNotEmpty()
   @IsNumber()
-  projetId: number;
+  projectId: number;
 
 }

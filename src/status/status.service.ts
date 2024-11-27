@@ -16,9 +16,7 @@ export class StatusService {
     return this.prisma.statut.create({
       data:{
         nom: data.nom,
-        projet: data.projectId
-              ? { connect: { id: data.projectId } }
-              : undefined,
+        projet:  { connect: { id: data.projectId } },
       },
     });
   }
@@ -40,10 +38,19 @@ export class StatusService {
     });
   }
 
-  async updateStatus(id: number, data: Prisma.StatutUpdateInput): Promise<Statut> {
+  async updateStatus(id: number, data: { projectId?: number | null, nom?: string, description?: string }): Promise<Statut> {
+    if(data.projectId){
+      const existProject = this.verifExistenceProject(data.projectId);
+      if (!existProject) {
+          throw new Error(`Projet id ${data.projectId} invalid`);
+      }
+    }
     return this.prisma.statut.update({
-      where: { id },
-      data,
+      where: { id: id },
+      data:{
+        nom: data.nom,
+        projet:  { connect: { id: data.projectId } },
+      },
     });
   }
 
