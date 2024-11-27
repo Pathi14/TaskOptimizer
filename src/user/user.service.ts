@@ -19,16 +19,9 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(data.mot_de_passe, 10);
     data.mot_de_passe = hashedPassword;
 
-    try {
       return this.prisma.utilisateur.create({
         data,
       });
-    } catch (error) {
-        if (error instanceof BadRequestException || error instanceof ConflictException) {
-            throw error;
-        }
-        throw new BadRequestException('Invalid request');
-    }
   }
 
 
@@ -50,19 +43,12 @@ export class UserService {
       },
     });
   }
-
+  
   async updateUser(id: number, data: Prisma.UtilisateurUpdateInput): Promise<Utilisateur> {
-    try {
       return this.prisma.utilisateur.update({
         where: { id },
         data,
       });
-    } catch (error) {
-        if (error instanceof BadRequestException || error instanceof ConflictException) {
-            throw error;
-        }
-        throw new BadRequestException('Invalid request');
-    }
   }
 
   async deleteUser(id: number): Promise<void> {
