@@ -10,21 +10,26 @@ import { AuthDto } from 'src/authentification/auth.dto';
 export class UserService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async createUser(data: Prisma.UtilisateurCreateInput): Promise<Utilisateur> {
+  async createUser(data: Prisma.UtilisateurCreateInput): Promise<{ accessToken: string; user: Utilisateur }> {
     const existingUser = await this.prisma.utilisateur.findUnique({
       where: { adresse_mail: data.adresse_mail },
     });
-
+ 
     if (existingUser) {
       throw new ConflictException('Adresse e-mail déjà utilisée');
     }
-
+ 
     const hashedPassword = await bcrypt.hash(data.mot_de_passe, 10);
     data.mot_de_passe = hashedPassword;
-
-      return this.prisma.utilisateur.create({
-        data,
-      });
+ 
+    const user = await this.prisma.utilisateur.create({
+      data,
+    });
+ 
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+ 
+    return { accessToken, user };
   }
 
 

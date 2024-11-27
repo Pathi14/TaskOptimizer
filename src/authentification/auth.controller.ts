@@ -8,8 +8,8 @@ export class AuthController {
   constructor(private readonly userService: UserService) {}
 
   @Post('signup')
-  async signUp(@Body() authDto: AuthDto): Promise<Utilisateur> {
-    return this.userService.createUser(authDto);
+  async signUp(@Body() authDTO: AuthDto): Promise<{ accessToken: string; user: Utilisateur }> {
+    return this.userService.createUser(authDTO);
   }
 
   @Post('signin')
