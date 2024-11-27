@@ -12,15 +12,7 @@ export class TaskService {
         description?: string, 
         date_echeance?:Date, 
         priorite?: number, 
-        projectId: number, 
         statusId: number}): Promise<void> {
-        
-        if(data.projectId){
-            const existProject = this.verifExistenceProject(data.projectId);
-            if (!existProject) {
-                throw new Error(`Projet id ${data.projectId} invalid`);
-            }
-        }
 
         if(data.statusId){
             const existStatus = this.verifyExistenceStatus(data.statusId);
@@ -35,9 +27,6 @@ export class TaskService {
                 description: data.description,
                 date_echeance: data.date_echeance,
                 priorite: data.priorite,
-                projet: data.projectId
-                  ? { connect: { id: data.projectId } }
-                  : undefined, 
                 statut: data.statusId
                   ? { connect: { id: data.statusId } }
                   : undefined,
@@ -52,16 +41,9 @@ export class TaskService {
           description?: string;
           date_echeance?: Date;
           priorite?: number;
-          projetId?: number;
           statutId?: number;
         }
       ): Promise<Tache> {
-        if(data.projetId){
-            const existProject = this.verifExistenceProject(data.projetId);
-            if (!existProject) {
-                throw new Error(`Projet id ${data.projetId} invalid`);
-            }
-        }
 
         if(data.statutId){
             const existStatus = this.verifyExistenceStatus(data.statutId);
@@ -79,9 +61,6 @@ export class TaskService {
             description: data.description,
             date_echeance: data.date_echeance,
             priorite: data.priorite,
-            projet: data.projetId
-              ? { connect: { id: data.projetId } }
-              : undefined,
             statut: data.statutId
               ? { connect: { id: data.statutId } }
               : undefined,
@@ -111,14 +90,6 @@ export class TaskService {
             where: { id },
         });
     }
-
-    async verifExistenceProject(projetId?: number | null): Promise<boolean> {
-        if (!projetId) return false; 
-        const projet = await this.prisma.projet.findUnique({
-          where: { id: projetId },
-        });
-        return !!projet;
-      }
       
       async verifExistenceUser(utilisateurId?: number | null): Promise<boolean> {
         if (!utilisateurId) return false;
