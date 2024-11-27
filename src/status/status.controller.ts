@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus, ParseIntPipe } from '@nestjs/common';
 import { StatusService } from './status.service';
-import {Statut as User, Prisma } from '@prisma/client';
 import { Statut } from '@prisma/client';
 import { CreateStatutDto } from './status.dto';
 
@@ -25,8 +24,7 @@ export class StatutController {
           throw error;
       }
       throw new BadRequestException('Invalid request');
-    }
-    ;
+    };
   }
 
   @Get(':id')
