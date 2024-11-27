@@ -12,7 +12,7 @@ import { ProjectModule } from './project/project.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UserModule, StatusModule, TagModule , TaskModule, ProjectModule
+    UserModule,
   ],
   providers: [PrismaService],
 })
