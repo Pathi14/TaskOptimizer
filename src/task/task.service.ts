@@ -81,9 +81,7 @@ export class TaskService {
             description: data.description,
             date_echeance: data.date_echeance,
             priorite: data.priorite,
-            statut: data.statutId
-              ? { connect: { id: data.statutId } }
-              : undefined,
+            statut: { connect: { id: data.statutId } },
             evolution: data.evolution,
           },
         });
