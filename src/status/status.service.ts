@@ -5,7 +5,7 @@ import { Statut, Prisma } from '@prisma/client';
 @Injectable()
 export class StatusService {
   constructor(private prisma: PrismaService) {}
-
+  
   async createStatus(data: {nom: string, projectId: number}): Promise<Statut> {
     if(data.projectId){
       const existProject = this.verifExistenceProject(data.projectId);
@@ -29,16 +29,17 @@ export class StatusService {
       },
     });
   }
-
-  async getStatus(): Promise<Statut[]> {
+  
+  async getStatusByProjectId(projectId: number): Promise<Statut[]> {
     return this.prisma.statut.findMany({
-      include: {
-        taches: true,
+      where: {
+        projetId: projectId,
       },
     });
   }
 
-  async updateStatus(id: number, data: { projectId?: number | null, nom?: string, description?: string }): Promise<Statut> {
+
+  async updateStatus(id: number, data: { projectId?: number | null, nom?: string }): Promise<Statut> {
     if(data.projectId){
       const existProject = this.verifExistenceProject(data.projectId);
       if (!existProject) {
