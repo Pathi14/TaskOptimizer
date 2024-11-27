@@ -9,13 +9,14 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Tag } from '@/components/ui/tag';
+import { Task } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, Pencil, Plus, WrapText } from 'lucide-react';
 import React from 'react';
 
-export function TaskCard() {
+export function TaskCard({ task: { title } }: { task: Task }) {
   const [date, setDate] = React.useState<Date>();
 
   return (
@@ -23,7 +24,7 @@ export function TaskCard() {
       <DialogTrigger>
         <div className="bg-card-light rounded-lg p-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base">Tâche n°1</h3>
+            <h3 className="text-base">{title}</h3>
             <Pencil className="size-4" />
           </div>
 
@@ -33,7 +34,7 @@ export function TaskCard() {
 
       <DialogContent className="bg-card border-none">
         <DialogHeader className="flex-row justify-between items-center mb-5">
-          <DialogTitle>Tâche n°1</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <div className="flex">
             <Avatar>
               <AvatarImage src="https://i.pravatar.cc/150?img=30" />

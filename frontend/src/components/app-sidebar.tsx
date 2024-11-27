@@ -15,14 +15,8 @@ import {
   SidebarContent,
   SidebarHeader,
 } from '@/components/ui/sidebar';
-import { useQuery } from 'react-query';
-import { axios } from '@/lib/axios';
-
-type Project = {
-  id: number;
-  title: string;
-  description: string;
-};
+import { useProjects } from '@/hooks/use-projects';
+import Link from 'next/link';
 
 const data = {
   user: {
@@ -110,25 +104,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: projects } = useQuery<Project[]>({
-    queryKey: ['projects'],
-    queryFn: () =>
-      axios
-        .get<
-          {
-            id: number;
-            titre: string;
-            description: string;
-          }[]
-        >('/projects')
-        .then((res) => {
-          return res.data.map((p) => ({
-            id: p.id,
-            title: p.titre,
-            description: p.description,
-          }));
-        }),
-  });
+  const { data: projects } = useProjects();
 
   const navMain = [
     {
@@ -138,16 +114,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       isActive: true,
       items: projects?.map((project) => ({
         title: project.title,
-        url: '',
+        url: `/project/${project.id}`,
       })),
     },
   ];
 
   return (
     <Sidebar collapsible="icon" className="p-2" {...props}>
-      <SidebarHeader className="rounded-lg bg-card mb-2 flex-row items-center gap-3 h-14 px-4">
-        <ClipboardList />
-        <div>Task Optimizer</div>
+      <SidebarHeader className="rounded-lg bg-card mb-2 h-14 px-4 grid  items-center">
+        <Link href="/">
+          <div className="flex items-center gap-3">
+            <ClipboardList />
+            <div>Task Optimizer</div>
+          </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent className=" rounded-lg bg-card">
         <NavMain items={navMain} />
