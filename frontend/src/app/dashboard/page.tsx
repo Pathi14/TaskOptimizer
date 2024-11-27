@@ -1,13 +1,33 @@
+'use client';
 import { AppSidebar } from '@/components/app-sidebar';
-import { TaskCard } from '@/components/task-card';
 import { TaskList } from '@/components/task-list';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { axios } from '@/lib/axios';
 import { ListFilter, Plus } from 'lucide-react';
+import { useQuery } from 'react-query';
+
+type Status = {
+  id: number;
+  name: string;
+  projectId: number;
+};
 
 export default function Page() {
+  const { data: statuses, isLoading } = useQuery<Status[]>({
+    queryKey: ['statuses'],
+    queryFn: () =>
+      axios
+        .get<{ id: number; nom: string; projetId: number }[]>('/status/1')
+        .then((res) =>
+          res.data.map((status) => ({
+            id: status.id,
+            name: status.nom,
+            projectId: status.projetId,
+          })),
+        ),
+  });
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -35,7 +55,12 @@ export default function Page() {
           </div>
 
           <div className="mt-5 flex items-start gap-3 overflow-auto">
-            <TaskList title="Backlog" />
+            {isLoading && <div>Chargement...</div>}
+
+            {statuses &&
+              statuses.map((status) => (
+                <TaskList key={status.id} title={status.name} />
+              ))}
 
             <button>
               <div className="w-80 min-w-80 bg-card border-2 border-dashed border-card-light p-3 rounded-lg hover:bg-card-light hover:border-white/60">

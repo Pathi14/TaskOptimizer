@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
+type Task = {};
+
 const TaskSchema = z.object({
   title: z.string(),
   priority: z.number().int().positive(),

@@ -1,34 +1,28 @@
 'use client';
-
 import * as React from 'react';
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   ClipboardList,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
   Settings,
-  Settings2,
-  SquareTerminal,
   Target,
   User,
 } from 'lucide-react';
-
 import { NavMain } from '@/components/nav-main';
-import { NavProjects } from '@/components/nav-projects';
-import { NavUser } from '@/components/nav-user';
-import { TeamSwitcher } from '@/components/team-switcher';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
-  SidebarRail,
 } from '@/components/ui/sidebar';
+import { useQuery } from 'react-query';
+import { axios } from '@/lib/axios';
+
+type Project = {
+  id: number;
+  title: string;
+  description: string;
+};
 
 const data = {
   user: {
@@ -116,6 +110,39 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: projects } = useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: () =>
+      axios
+        .get<
+          {
+            id: number;
+            titre: string;
+            description: string;
+          }[]
+        >('/projects')
+        .then((res) => {
+          return res.data.map((p) => ({
+            id: p.id,
+            title: p.titre,
+            description: p.description,
+          }));
+        }),
+  });
+
+  const navMain = [
+    {
+      title: 'Projets',
+      url: '#',
+      icon: Target,
+      isActive: true,
+      items: projects?.map((project) => ({
+        title: project.title,
+        url: '',
+      })),
+    },
+  ];
+
   return (
     <Sidebar collapsible="icon" className="p-2" {...props}>
       <SidebarHeader className="rounded-lg bg-card mb-2 flex-row items-center gap-3 h-14 px-4">
@@ -123,7 +150,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div>Task Optimizer</div>
       </SidebarHeader>
       <SidebarContent className=" rounded-lg bg-card">
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
     </Sidebar>
   );
