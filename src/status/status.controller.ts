@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus, ParseIntPipe } from '@nestjs/common';
 import { StatusService } from './status.service';
-import {Statut as User, Prisma } from '@prisma/client';
 import { Statut } from '@prisma/client';
 import { CreateStatutDto } from './status.dto';
 
@@ -25,8 +24,7 @@ export class StatutController {
           throw error;
       }
       throw new BadRequestException('Invalid request');
-    }
-    ;
+    };
   }
 
   @Get(':id')
@@ -40,9 +38,13 @@ export class StatutController {
   }
 
   @Put(':id')
-  async updateStatus(@Param('id') id: number, @Body() data: { projectId?: number, nom?: string  }): Promise<Statut> {
+  async updateStatus(@Param('id', ParseIntPipe) id: number, @Body() data: { projectId?: number, nom?: string  }): Promise<Statut> {
+    if (!data) {
+      throw new BadRequestException('None value to update');
+    }
+
     try {
-      return this.statusService.updateStatus(Number(id), data);
+      return this.statusService.updateStatus(id, data);
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof ConflictException) {
           throw error;

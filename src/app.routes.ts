@@ -3,6 +3,7 @@ import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
 import { UserModule } from './user/user.module';
 import { StatusModule } from './status/status.module';
+import { TagModule } from './tag/tag.module';
 
 export const routes: Routes = [
     {
@@ -20,5 +21,9 @@ export const routes: Routes = [
     {
         path: 'status',
         module: StatusModule
+    },
+    {
+        path: 'tags',
+        module: TagModule,
     }
 ];

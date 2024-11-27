@@ -40,17 +40,21 @@ export class StatusService {
 
 
   async updateStatus(id: number, data: { projectId?: number | null, nom?: string }): Promise<Statut> {
+
     if(data.projectId){
       const existProject = this.verifExistenceProject(data.projectId);
       if (!existProject) {
           throw new Error(`Projet id ${data.projectId} invalid`);
       }
     }
+
     return this.prisma.statut.update({
       where: { id: id },
       data:{
         nom: data.nom,
-        projet:  { connect: { id: data.projectId } },
+        projet: data.projectId !== undefined && data.projectId !== null
+        ? { connect: { id: data.projectId } }
+        : undefined,
       },
     });
   }

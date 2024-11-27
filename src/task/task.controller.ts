@@ -11,7 +11,7 @@ export class TaskController {
     async createTask(
     @Body() body: CreateTaskDto
     ) {
-        if (!body.titre || !body.statusId || !body.projectId) {
+        if (!body.titre || !body.statusId ) {
             throw new BadRequestException('Missing required fields');
         }
 
@@ -26,9 +26,9 @@ export class TaskController {
         
     }
 
-    @Get()
-    async getTask(): Promise<Tache[]> {
-        return this.taskService.getTasks();
+    @Get('status/:id')
+    async getStatusByStatusId(@Param('id', ParseIntPipe) id: number): Promise<Tache[]> {
+        return this.taskService.getTacheByStatusId(id);
     }
     
     @Put(':id')
@@ -70,5 +70,47 @@ export class TaskController {
     @Get(':id')
     async getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Tache> {
         return this.taskService.getTaskById(id);
+    }
+
+    @Put('/users/:idTask')
+    async addUsersToTask(
+        @Param('idTask', ParseIntPipe) idTask: number,
+        @Body() body: { usersIds: number[] }
+    ): Promise<void>{
+        if(idTask === undefined || idTask === null){
+            throw new BadRequestException('Missing required fields');
+        }
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
+
+        try {
+            await this.taskService.addUsersToTask(idTask, body.usersIds);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
+    }
+
+    @Delete('/users/:idTask/:idUser')
+    async removeUserFromProjet(
+        @Param('idTask', ParseIntPipe) idTask: number,
+        @Param('idUser', ParseIntPipe) idUser: number
+    ): Promise<void> {
+        if (idTask === undefined || idTask === null || idUser === undefined || idUser === null) {
+            throw new BadRequestException('Missing required fields');
+        }
+
+        try {
+            await this.taskService.removeUserFromTask(idTask, idUser);
+        } catch (error) {
+            if (error.message.includes('n\'existe pas') || error.message.includes('n\'est pas associé')) {
+                throw new BadRequestException(error.message);
+            }
+            throw new BadRequestException('Invalid request');
+        }
     }
 }
