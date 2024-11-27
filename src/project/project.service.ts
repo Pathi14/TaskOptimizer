@@ -126,5 +126,6 @@ export class ProjectService {
                 id_utilisateur: userId,
             },
         });
-        return !!associationExists;    }
+        return !!associationExists;    
+    }
 }
