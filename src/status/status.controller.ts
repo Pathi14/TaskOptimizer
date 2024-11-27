@@ -4,7 +4,7 @@ import {Statut as User, Prisma } from '@prisma/client';
 import { Statut } from '@prisma/client';
 import { CreateStatutDto } from './status.dto';
 
-@Controller()
+@Controller('status')
 export class StatutController {
   constructor(private readonly statutService: StatusService) {}
 

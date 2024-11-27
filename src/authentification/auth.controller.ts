@@ -20,10 +20,10 @@ export class AuthController {
   /**
    * Endpoint pour l'authentification d'un utilisateur.
    * @param authDto - Les informations d'authentification de l'utilisateur.
-   * @returns Un objet contenant le jeton d'accès JWT.
+   * @returns Un objet contenant le jeton d'accès JWT et les informations de l'utilisateur.
    */
   @Post('signin')
-  async signIn(@Body() authDto: AuthDto): Promise<{ accessToken: string }> {
+  async signIn(@Body() authDto: AuthDto): Promise<{ accessToken: string; user: any }> {
     return this.userService.authenticateUser(authDto);
   }
 }

@@ -72,13 +72,22 @@ export class UserService {
       where: { id },
     });
     return !!user;
-  }
-
-  
-  async authenticateUser(authDto: AuthDto): Promise<{ accessToken: string }> {
+  }  async authenticateUser(authDto: AuthDto): Promise<{ accessToken: string; user: any }> {
     const { adresse_mail, mot_de_passe } = authDto;
     const user = await this.prisma.utilisateur.findUnique({
       where: { adresse_mail },
+      include: {
+        projets: {
+          include: {
+            taches: {
+              include: {
+                statut: true,
+                tags: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!user || !(await bcrypt.compare(mot_de_passe, user.mot_de_passe))) {
@@ -88,6 +97,6 @@ export class UserService {
     const payload = { userId: user.id };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken };
+    return { accessToken, user };
   }
 }
