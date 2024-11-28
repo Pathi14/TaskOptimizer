@@ -1,3 +1,6 @@
+'use client';
+import { ProjectList } from '@/components/project-list';
+
 export default function Home() {
-  return <h1>Hello, Task Optimizer 👋</h1>;
+  return <ProjectList />;
 }

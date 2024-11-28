@@ -1,34 +1,22 @@
 'use client';
-
 import * as React from 'react';
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   ClipboardList,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
   Settings,
-  Settings2,
-  SquareTerminal,
   Target,
   User,
 } from 'lucide-react';
-
 import { NavMain } from '@/components/nav-main';
-import { NavProjects } from '@/components/nav-projects';
-import { NavUser } from '@/components/nav-user';
-import { TeamSwitcher } from '@/components/team-switcher';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
-  SidebarRail,
 } from '@/components/ui/sidebar';
+import { useProjects } from '@/hooks/use-projects';
+import Link from 'next/link';
 
 const data = {
   user: {
@@ -116,14 +104,33 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: projects } = useProjects();
+
+  const navMain = [
+    {
+      title: 'Projets',
+      url: '#',
+      icon: Target,
+      isActive: true,
+      items: projects?.map((project) => ({
+        title: project.title,
+        url: `/project/${project.id}`,
+      })),
+    },
+  ];
+
   return (
     <Sidebar collapsible="icon" className="p-2" {...props}>
-      <SidebarHeader className="rounded-lg bg-card mb-2 flex-row items-center gap-3 h-14 px-4">
-        <ClipboardList />
-        <div>Task Optimizer</div>
+      <SidebarHeader className="rounded-lg bg-card mb-2 h-14 px-4 grid  items-center">
+        <Link href="/">
+          <div className="flex items-center gap-3">
+            <ClipboardList />
+            <div>Task Optimizer</div>
+          </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent className=" rounded-lg bg-card">
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
     </Sidebar>
   );

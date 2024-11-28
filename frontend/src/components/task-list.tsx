@@ -4,43 +4,57 @@ import { Button } from '@/components/ui/button';
 import { axios } from '@/lib/axios';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-import { createRef, useRef, useState } from 'react';
-import { useMutation } from 'react-query';
+import { useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Status, Task } from '@/lib/types';
+import { title } from 'process';
 
 const TaskSchema = z.object({
   title: z.string(),
-  priority: z.number().int().positive(),
-  endDate: z.date(),
+  statusId: z.number().int().positive(),
 });
 
-export function TaskList({ title }: { title: string }) {
+export function TaskList({ status }: { status: Status }) {
+  const queryClient = useQueryClient();
   const [isCreationModeEnabled, setCreationModeEnabled] = useState(false);
   const { mutateAsync: addTask } = useMutation({
-    mutationFn: (payload: {
-      title: string;
-      endDate: string;
-      priority: number;
-    }) =>
+    mutationFn: (payload: Pick<Task, 'title' | 'statusId'>) =>
       axios
         .post('/tasks', {
           titre: payload.title,
-          date_echeance: payload.endDate,
-          priorite: payload.priority,
+          statusId: payload.statusId,
         })
         .then((res) => res.data)
         .catch(console.log),
   });
+  const { data: tasks } = useQuery<Task[]>(['tasks', status.id], () =>
+    axios
+      .get<
+        {
+          id: number;
+          titre: string;
+          statusId: number;
+          description: string;
+        }[]
+      >(`/tasks/status/${status.id}`)
+      .then((res) =>
+        res.data.map((t) => ({
+          title: t.titre,
+          description: t.description,
+          statusId: t.statusId,
+          id: t.id,
+        })),
+      ),
+  );
   const form = useForm<z.infer<typeof TaskSchema>>({
     resolver: zodResolver(TaskSchema),
     defaultValues: {
-      endDate: new Date(),
-      priority: 5,
+      statusId: Number(status.id),
     },
   });
-  const formRef = useRef<HTMLFormElement>(null);
 
   function toggleCreationMode() {
     setCreationModeEnabled(!isCreationModeEnabled);
@@ -48,38 +62,39 @@ export function TaskList({ title }: { title: string }) {
 
   async function onSubmit(payload: z.infer<typeof TaskSchema>) {
     console.log(payload);
-    await addTask({ ...payload, endDate: payload.endDate.toISOString() });
+    toggleCreationMode();
+    await addTask(payload);
+    form.reset();
+    queryClient.invalidateQueries(['tasks', status.id]);
   }
 
   return (
-    <div className="rounded-lg bg-card p-4 min-w-80 w-80 min-h-96">
-      <h2 className="mb-7 uppercase text-base">{title}</h2>
+    <div className="rounded-lg bg-card p-4 min-w-80 w-80 min-h-96 flex flex-col">
+      <h2 className="mb-7 uppercase text-base">{status.name}</h2>
 
-      <div className="flex flex-col gap-2">
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
+      <div className="flex flex-col gap-2 flex-1">
+        {tasks?.map((task) => <TaskCard key={task.id} task={task} />)}
+
         {isCreationModeEnabled && (
-          <form onSubmit={form.handleSubmit(onSubmit)} ref={formRef}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <textarea
               {...form.register('title')}
               className="bg-card-light rounded-lg w-full min-h-16 p-3 resize-none"
-              onKeyDown={(e) => {
-                form.handleSubmit(onSubmit);
-              }}
+              autoFocus
             />
 
             <Button type="submit" className="bg-sky-700 hover:bg-sky-800 mr-3">
               Ajouter une carte
             </Button>
 
-            <Button variant="ghost" type="reset">
+            <Button variant="ghost" onClick={toggleCreationMode}>
               Annuler
             </Button>
           </form>
         )}
+
         <Button
-          className={cn('bg-card hover:bg-card-light mt-10')}
+          className="bg-card hover:bg-card-light mt-auto justify-self-end"
           onClick={toggleCreationMode}
           disabled={isCreationModeEnabled}
         >

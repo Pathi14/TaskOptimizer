@@ -8,49 +8,73 @@ generator client {
 }
 
 model Utilisateur {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   nom          String
-  adresse_mail String   @unique
+  adresse_mail String     @unique
   mot_de_passe String
-  taches       Tache[]  @relation("UtilisateurTaches")
-  projets      Projet[] @relation("UtilisateurProjets")
+  taches       Affecter[]
+  projets      Associer[]
 }
 
 model Tache {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   titre         String
   description   String?
-  projet        Projet?   @relation(fields: [projetId], references: [id])
-  projetId      Int?
-  date_creation DateTime @default(now())
-  date_echeance DateTime
-  statut        Statut?   @relation(fields: [statutId], references: [id])
-  statutId      Int?
-  priorite      Int
-  tags          Tag[]
-  sousTaches    Tache[]  @relation("SousTacheRelation")
-  parentTache   Tache?   @relation("SousTacheRelation", fields: [sousTacheId], references: [id])
-  sousTacheId   Int?
-  utilisateur   Utilisateur? @relation("UtilisateurTaches", fields: [utilisateurId], references: [id])
-  utilisateurId Int?
+  date_creation DateTime   @default(now())
+  date_echeance DateTime?
+  priorite      Int?
+  sousTache     Tache?     @relation("ParentChildRelation", fields: [sous_tache], references: [id])
+  sous_tache    Int?
+  sousTaches    Tache[]    @relation("ParentChildRelation")
+  evolution     Int?
+  statut        Statut     @relation(fields: [statutId], references: [id])
+  statutId      Int
+  utilisateurs  Affecter[]
+  tags          Posseder[]
 }
 
 model Projet {
-  id            Int          @id @default(autoincrement())
-  titre         String
-  description   String?
-  utilisateurs   Utilisateur[] @relation("UtilisateurProjets")
-  taches        Tache[]
+  id           Int        @id @default(autoincrement())
+  titre        String
+  description  String?
+  utilisateurs Associer[]
+  statuts      Statut[]
 }
 
 model Statut {
-  id    Int      @id @default(autoincrement())
-  nom   String
-  taches Tache[]
+  id       Int     @id @default(autoincrement())
+  nom      String
+  projet   Projet  @relation(fields: [projetId], references: [id])
+  projetId Int
+  taches   Tache[]
 }
 
 model Tag {
-  id      Int      @id @default(autoincrement())
+  id       Int        @id @default(autoincrement())
   type_tag String
-  taches   Tache[]
+  taches   Posseder[]
+}
+
+model Affecter {
+  id             Int         @id @default(autoincrement())
+  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id])
+  id_utilisateur Int
+  tache          Tache       @relation(fields: [id_tache], references: [id])
+  id_tache       Int
+}
+
+model Associer {
+  id             Int         @id @default(autoincrement())
+  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id])
+  id_utilisateur Int
+  projet         Projet      @relation(fields: [id_projet], references: [id])
+  id_projet      Int
+}
+
+model Posseder {
+  id       Int   @id @default(autoincrement())
+  tag      Tag   @relation(fields: [id_tag], references: [id])
+  id_tag   Int
+  tache    Tache @relation(fields: [id_tache], references: [id])
+  id_tache Int
 }
