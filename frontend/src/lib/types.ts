@@ -18,3 +18,9 @@ export type Task = {
   endDate?: string;
   statusId?: number;
 };
+
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+};
