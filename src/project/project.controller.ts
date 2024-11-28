@@ -1,9 +1,11 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { Prisma, Projet } from '@prisma/client';
 import { CreateProjectDto } from './project.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class ProjetController {
 
     constructor(private readonly projectService: ProjectService) {}

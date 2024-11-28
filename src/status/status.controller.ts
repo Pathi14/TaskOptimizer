@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { Statut } from '@prisma/client';
 import { CreateStatutDto } from './status.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class StatutController {
   constructor(private readonly statusService: StatusService) {}
 

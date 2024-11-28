@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, ConflictException, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { Tag } from '@prisma/client';
 import { Statut, Prisma } from '@prisma/client';
 import { CreateTagDto } from './tag.dto';
+import { AuthGuard } from '@nestjs/passport';
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
