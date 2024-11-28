@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { Utilisateur as User, Prisma } from '@prisma/client';
 import { CreateUserDto } from './user.dto';
 
-@Controller('users')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

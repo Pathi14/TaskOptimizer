@@ -1,9 +1,11 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Tache } from '@prisma/client';
 import { CreateTaskDto } from './task.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class TaskController {
     constructor(private readonly taskService: TaskService) {}
 
