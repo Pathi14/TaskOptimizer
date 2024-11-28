@@ -113,4 +113,27 @@ export class TaskController {
             throw new BadRequestException('Invalid request');
         }
     }
+
+    @Put('/tags/:idTask')
+    async addTagToTask(
+        @Param('idTask', ParseIntPipe) idTask: number,
+        @Body() body: { tagsIds: number[] }
+    ): Promise<void>{
+        if(idTask === undefined || idTask === null){
+            throw new BadRequestException('Missing required fields');
+        }
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
+
+        try {
+            await this.taskService.addTagToTask(idTask, body.tagsIds);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
+    }
 }
