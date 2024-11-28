@@ -2,15 +2,15 @@
 import { TaskCard } from '@/components/task-card';
 import { Button } from '@/components/ui/button';
 import { axios } from '@/lib/axios';
-import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Status, Task } from '@/lib/types';
-import { title } from 'process';
+import { useDroppable } from '@dnd-kit/core';
+import { cn } from '@/lib/utils';
 
 const TaskSchema = z.object({
   title: z.string(),
@@ -36,7 +36,7 @@ export function TaskList({ status }: { status: Status }) {
         {
           id: number;
           titre: string;
-          statusId: number;
+          statutId: number;
           description: string;
         }[]
       >(`/tasks/status/${status.id}`)
@@ -44,7 +44,7 @@ export function TaskList({ status }: { status: Status }) {
         res.data.map((t) => ({
           title: t.titre,
           description: t.description,
-          statusId: t.statusId,
+          statusId: t.statutId,
           id: t.id,
         })),
       ),
@@ -68,12 +68,25 @@ export function TaskList({ status }: { status: Status }) {
     queryClient.invalidateQueries(['tasks', status.id]);
   }
 
+  const { isOver, setNodeRef } = useDroppable({
+    id: status.id,
+  });
+
   return (
-    <div className="rounded-lg bg-card p-4 min-w-80 w-80 min-h-96 flex flex-col">
+    <div
+      className={cn(
+        'rounded-lg bg-card p-4 min-w-80 w-80 min-h-96 flex flex-col border-2 border-transparent',
+        isOver && 'border-dashed border-card-light',
+      )}
+    >
       <h2 className="mb-7 uppercase text-base">{status.name}</h2>
 
-      <div className="flex flex-col gap-2 flex-1">
-        {tasks?.map((task) => <TaskCard key={task.id} task={task} />)}
+      <div className="flex flex-col gap-2 flex-1" ref={setNodeRef}>
+        {tasks?.map((task) => (
+          <div key={task.id} data-swapy-slot={task.id}>
+            <TaskCard task={task} />
+          </div>
+        ))}
 
         {isCreationModeEnabled && (
           <form onSubmit={form.handleSubmit(onSubmit)}>

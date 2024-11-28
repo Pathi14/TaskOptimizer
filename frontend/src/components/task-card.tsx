@@ -11,18 +11,33 @@ import {
 import { Tag } from '@/components/ui/tag';
 import { Task } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useDraggable } from '@dnd-kit/core';
 import { DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, Pencil, Plus, WrapText } from 'lucide-react';
 import React from 'react';
 
-export function TaskCard({ task: { title } }: { task: Task }) {
+export function TaskCard({ task: { id, title, statusId } }: { task: Task }) {
   const [date, setDate] = React.useState<Date>();
+  const { setNodeRef, listeners, attributes, transform } = useDraggable({
+    id: `${statusId}_${id}`,
+  });
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <div className="bg-card-light rounded-lg p-3">
+      <DialogTrigger asChild>
+        <div
+          className="bg-card-light rounded-lg p-3"
+          ref={setNodeRef}
+          {...attributes}
+          {...listeners}
+          style={style}
+        >
           <div className="flex items-center justify-between">
             <h3 className="text-base">{title}</h3>
             <Pencil className="size-4" />
