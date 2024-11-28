@@ -1,34 +1,35 @@
-import { Injectable ,  ConflictException, BadRequestException} from '@nestjs/common';
+import { Injectable ,  ConflictException , UnauthorizedException , BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { Utilisateur, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { AuthDto } from 'src/authentification/auth.dto';
+
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async createUser(data: Prisma.UtilisateurCreateInput): Promise<Utilisateur> {
+  async createUser(data: Prisma.UtilisateurCreateInput): Promise<{ accessToken: string; user: Utilisateur }> {
     const existingUser = await this.prisma.utilisateur.findUnique({
       where: { adresse_mail: data.adresse_mail },
     });
-
+ 
     if (existingUser) {
       throw new ConflictException('Adresse e-mail déjà utilisée');
     }
-
+ 
     const hashedPassword = await bcrypt.hash(data.mot_de_passe, 10);
     data.mot_de_passe = hashedPassword;
-
-    try {
-      return this.prisma.utilisateur.create({
-        data,
-      });
-    } catch (error) {
-        if (error instanceof BadRequestException || error instanceof ConflictException) {
-            throw error;
-        }
-        throw new BadRequestException('Invalid request');
-    }
+ 
+    const user = await this.prisma.utilisateur.create({
+      data,
+    });
+ 
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+ 
+    return { accessToken, user };
   }
 
 
@@ -50,19 +51,12 @@ export class UserService {
       },
     });
   }
-
+  
   async updateUser(id: number, data: Prisma.UtilisateurUpdateInput): Promise<Utilisateur> {
-    try {
       return this.prisma.utilisateur.update({
         where: { id },
         data,
       });
-    } catch (error) {
-        if (error instanceof BadRequestException || error instanceof ConflictException) {
-            throw error;
-        }
-        throw new BadRequestException('Invalid request');
-    }
   }
 
   async deleteUser(id: number): Promise<void> {
@@ -83,5 +77,20 @@ export class UserService {
       where: { id },
     });
     return !!user;
+  }  
+  async authenticateUser(authDto: AuthDto): Promise<{ accessToken: string }> {
+    const { adresse_mail, mot_de_passe } = authDto;
+    const user = await this.prisma.utilisateur.findUnique({
+      where: { adresse_mail },
+    });
+ 
+    if (!user || !(await bcrypt.compare(mot_de_passe, user.mot_de_passe))) {
+      throw new UnauthorizedException('Adresse e-mail ou mot de passe incorrect');
+    }
+ 
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+ 
+    return { accessToken };
   }
 }
