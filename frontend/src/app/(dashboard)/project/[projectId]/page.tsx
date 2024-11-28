@@ -10,7 +10,7 @@ import { use, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
-import { DndContext } from '@dnd-kit/core';
+import { DndContext, PointerSensor, useSensor } from '@dnd-kit/core';
 
 const StatusSchema = z.object({
   name: z.string().min(1),
@@ -80,6 +80,12 @@ export default function Page({
     queryClient.invalidateQueries(['statuses', projectId]);
   }
 
+  const sensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 1,
+    },
+  });
+
   return (
     <>
       <div className="relative">
@@ -111,6 +117,7 @@ export default function Page({
               queryClient.invalidateQueries(['tasks', Number(sourceStatusId)]),
             ]);
           }}
+          sensors={[sensor]}
         >
           {statuses &&
             statuses.map((status) => (

@@ -38,6 +38,7 @@ export function TaskList({ status }: { status: Status }) {
           titre: string;
           statutId: number;
           description: string;
+          date_echeance: string;
         }[]
       >(`/tasks/status/${status.id}`)
       .then((res) =>
@@ -46,6 +47,7 @@ export function TaskList({ status }: { status: Status }) {
           description: t.description,
           statusId: t.statutId,
           id: t.id,
+          endDate: t.date_echeance,
         })),
       ),
   );
