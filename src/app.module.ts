@@ -8,6 +8,8 @@ import { StatusModule } from './status/status.module';
 import { TagModule } from './tag/tag.module';
 import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
+import { EmailModule } from './email/email.module';
+import { EmailService } from './email/email.service';
 
 @Module({
   imports: [
@@ -20,7 +22,8 @@ import { ProjectModule } from './project/project.module';
     ProjectModule,
     StatusModule,
     TagModule,
+    EmailModule,
   ],
-  providers: [PrismaService],
+  providers: [PrismaService, EmailService],
 })
 export class AppModule {}

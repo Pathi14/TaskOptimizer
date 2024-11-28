@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Tache } from '@prisma/client';
+import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class TaskService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
     
   async addTask(data : {
       titre: string, 
@@ -86,8 +90,7 @@ export class TaskService {
           evolution: data.evolution,
         },
       });
-  }
-      
+  }   
     
   async getTacheByStatusId(statusId: number): Promise<Tache[]> {
     return this.prisma.tache.findMany({
@@ -145,6 +148,26 @@ export class TaskService {
             })
         )
     );
+
+    // const userEmails = await Promise.all(
+    //   userIds.map(async (userId) => {
+    //     const user = await this.prisma.utilisateur.findUnique({
+    //       where: { id: userId },
+    //     });
+    //     return user?.adresse_mail;
+    //   }),
+    // );
+
+    // for (const email of userEmails) {
+    //   if (email) {
+    //     await this.emailService.sendEmail(
+    //       email,
+    //       'New Task Assignment',
+    //       `You have been assigned to task ID ${taskId}. Please check your dashboard for details.`,
+    //     );
+    //   }
+    // }
+
   }
 
   async removeUserFromTask(TaskId: number, userId: number): Promise<void> {
@@ -171,6 +194,66 @@ export class TaskService {
         where: {
             id_tache: TaskId,
             id_utilisateur: userId,
+        },
+    });
+  }
+
+  async addTagToTask(taskId: number, tagsIds: number[]): Promise<void> {
+
+    if(taskId){
+        const existTask = this.verifyExistenceTask(taskId);
+        if (!existTask) {
+            throw new Error(`Task id ${taskId} invalid`);
+        }
+    }
+
+    for (const tagId of tagsIds) {
+      const tagExist = await this.verifExistenceTag(tagId);
+      if (!tagExist) {
+        throw new Error(`User with'ID ${tagId} doesn't exist`);
+      }
+      const alreadyAssociated = await this.checkTagTaskAssociation(taskId, tagId);
+      if (alreadyAssociated) {
+          throw new Error(`User with ID ${tagId} already has association with Task with ID ${taskId}`);
+      }
+    }
+
+    await Promise.all(
+      tagsIds.map((tagId) =>
+            this.prisma.posseder.create({
+                data: {
+                    id_tag: tagId,
+                    id_tache: taskId,
+                },
+            })
+        )
+    );
+  }
+
+  async removeTagFromTask(TaskId: number, TagId: number): Promise<void> {
+        
+    if(TaskId){
+        const existTask = this.verifyExistenceTask(TaskId);
+        if (!existTask) {
+            throw new Error(`Task id ${TaskId} invalid`);
+        }
+    }
+
+    const tagExists = await this.verifExistenceUser(TagId);
+    if (!tagExists) {
+      throw new Error(`Tag with'ID ${TagId} doesn't exist`);
+    }
+    const associationExists = await this.checkUserTaskAssociation(TaskId, TagId);
+    if (!associationExists) {
+        throw new Error(
+            `Tag with ID ${TagId} doesn't have association with Task with ID ${TaskId}`
+        );
+    }
+
+    await this.prisma.posseder.deleteMany({
+        where: {
+            id_tache: TaskId,
+            id_tag: TagId,
         },
     });
   }
@@ -207,6 +290,24 @@ export class TaskService {
       where: { id: statutId },
     });
     return !!status;
+  }
+
+  private async verifExistenceTag(tagId?: number | null): Promise<boolean> {
+    if (!tagId) return false;
+    const tag = await this.prisma.tag.findUnique({
+      where: { id: tagId },
+    });
+    return !!tag;
+  }
+
+  private async checkTagTaskAssociation(taskId: number, tagId: number): Promise<boolean> {
+    const associationExists = await this.prisma.posseder.findFirst({
+        where: {
+            id_tache: taskId,
+            id_tag: tagId,
+        },
+    });
+    return !!associationExists;    
   }
       
 }

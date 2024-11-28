@@ -96,7 +96,7 @@ export class TaskController {
     }
 
     @Delete('/users/:idTask/:idUser')
-    async removeUserFromProjet(
+    async removeUserFromTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Param('idUser', ParseIntPipe) idUser: number
     ): Promise<void> {
@@ -106,6 +106,48 @@ export class TaskController {
 
         try {
             await this.taskService.removeUserFromTask(idTask, idUser);
+        } catch (error) {
+            if (error.message.includes('n\'existe pas') || error.message.includes('n\'est pas associé')) {
+                throw new BadRequestException(error.message);
+            }
+            throw new BadRequestException('Invalid request');
+        }
+    }
+
+    @Put('/tags/:idTask')
+    async addTagToTask(
+        @Param('idTask', ParseIntPipe) idTask: number,
+        @Body() body: { tagsIds: number[] }
+    ): Promise<void>{
+        if(idTask === undefined || idTask === null){
+            throw new BadRequestException('Missing required fields');
+        }
+        if (!body) {
+            throw new BadRequestException('None value to update');
+        }
+
+        try {
+            await this.taskService.addTagToTask(idTask, body.tagsIds);
+        } catch (error) {
+            if (error instanceof BadRequestException || error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException('Invalid request');
+        }
+        
+    }
+
+    @Delete('/tags/:idTask/:idTag')
+    async removeTagFromTask(
+        @Param('idTask', ParseIntPipe) idTask: number,
+        @Param('idTag', ParseIntPipe) idTag: number
+    ): Promise<void> {
+        if (idTask === undefined || idTask === null || idTag === undefined || idTag === null) {
+            throw new BadRequestException('Missing required fields');
+        }
+
+        try {
+            await this.taskService.removeTagFromTask(idTask, idTag);
         } catch (error) {
             if (error.message.includes('n\'existe pas') || error.message.includes('n\'est pas associé')) {
                 throw new BadRequestException(error.message);

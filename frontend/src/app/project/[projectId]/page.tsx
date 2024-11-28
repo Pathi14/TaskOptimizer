@@ -3,13 +3,14 @@ import { TaskList } from '@/components/task-list';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { axios } from '@/lib/axios';
-import { Status } from '@/lib/types';
+import { Status, Task } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ListFilter, Plus } from 'lucide-react';
 import { use, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
+import { DndContext } from '@dnd-kit/core';
 
 const StatusSchema = z.object({
   name: z.string().min(1),
@@ -59,6 +60,13 @@ export default function Page({
     },
   });
 
+  const { mutateAsync: updateTask } = useMutation({
+    mutationFn: (payload: { taskId: Task['id']; statusId: Status['id'] }) =>
+      axios.put(`/tasks/${payload.taskId}`, {
+        statutId: payload.statusId,
+      }),
+  });
+
   const [isCreationModeEnabled, setCreationModeEnabled] = useState(false);
 
   function toggleCreationMode() {
@@ -85,10 +93,30 @@ export default function Page({
       <div className="mt-5 flex items-start gap-3 overflow-auto">
         {isLoading && <div>Chargement...</div>}
 
-        {statuses &&
-          statuses.map((status) => (
-            <TaskList key={status.id} status={status} />
-          ))}
+        <DndContext
+          onDragEnd={async (event) => {
+            console.log(event);
+            const [sourceStatusId, taskId] = String(event.active.id).split('_');
+            const targetStatusId = event.over?.id;
+
+            if (!targetStatusId || !sourceStatusId || !taskId) return;
+
+            await updateTask({
+              taskId: Number(taskId),
+              statusId: Number(targetStatusId),
+            });
+
+            Promise.all([
+              queryClient.invalidateQueries(['tasks', Number(targetStatusId)]),
+              queryClient.invalidateQueries(['tasks', Number(sourceStatusId)]),
+            ]);
+          }}
+        >
+          {statuses &&
+            statuses.map((status) => (
+              <TaskList key={status.id} status={status} />
+            ))}
+        </DndContext>
 
         {isCreationModeEnabled && (
           <form onSubmit={form.handleSubmit(onSubmit)}>
