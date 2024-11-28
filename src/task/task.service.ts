@@ -97,6 +97,9 @@ export class TaskService {
       where: {
         statutId: statusId,
       },
+      include: {
+        tags: true,
+      },
     });
   }
 
@@ -115,6 +118,9 @@ export class TaskService {
   async getTaskById(id: number): Promise<Tache> {
       return this.prisma.tache.findUnique({
           where: { id },
+          include: {
+            tags: true,
+          },
       });
   }
 
