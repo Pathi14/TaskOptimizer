@@ -74,7 +74,7 @@ export class ProjetController {
         return this.projectService.getProjectbyId(id);
     }
 
-    @Put('/users/:idProject')
+    @Put('/:idProject/users')
     async addUsersToProjet(
         @Param('idProject', ParseIntPipe) idProject: number,
         @Body() body: { usersIds: number[] }
@@ -97,7 +97,7 @@ export class ProjetController {
         
     }
 
-    @Delete('/users/:idProject/:idUser')
+    @Delete('/:idProject/users/:idUser')
     async removeUserFromProjet(
         @Param('idProject', ParseIntPipe) idProject: number,
         @Param('idUser', ParseIntPipe) idUser: number

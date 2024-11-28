@@ -230,30 +230,30 @@ export class TaskService {
     );
   }
 
-  async removeTagFromTask(TaskId: number, TagId: number): Promise<void> {
+  async removeTagFromTask(taskId: number, tagId: number): Promise<void> {
         
-    if(TaskId){
-        const existTask = this.verifyExistenceTask(TaskId);
+    if(taskId){
+        const existTask = this.verifyExistenceTask(taskId);
         if (!existTask) {
-            throw new Error(`Task id ${TaskId} invalid`);
+            throw new Error(`Task id ${taskId} invalid`);
         }
     }
 
-    const tagExists = await this.verifExistenceUser(TagId);
+    const tagExists = await this.verifExistenceTag(tagId);
     if (!tagExists) {
-      throw new Error(`Tag with'ID ${TagId} doesn't exist`);
+      throw new Error(`Tag with'ID ${tagId} doesn't exist`);
     }
-    const associationExists = await this.checkUserTaskAssociation(TaskId, TagId);
+    const associationExists = await this.checkTagTaskAssociation(taskId, tagId);
     if (!associationExists) {
         throw new Error(
-            `Tag with ID ${TagId} doesn't have association with Task with ID ${TaskId}`
+            `Tag with ID ${tagId} doesn't have association with Task with ID ${taskId}`
         );
     }
 
     await this.prisma.posseder.deleteMany({
         where: {
-            id_tache: TaskId,
-            id_tag: TagId,
+            id_tache: taskId,
+            id_tag: tagId,
         },
     });
   }

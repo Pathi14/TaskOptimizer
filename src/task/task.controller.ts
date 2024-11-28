@@ -72,7 +72,7 @@ export class TaskController {
         return this.taskService.getTaskById(id);
     }
 
-    @Put('/users/:idTask')
+    @Put('/:idTask/users')
     async addUsersToTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Body() body: { usersIds: number[] }
@@ -95,7 +95,7 @@ export class TaskController {
         
     }
 
-    @Delete('/users/:idTask/:idUser')
+    @Delete('/:idTask/users/:idUser')
     async removeUserFromTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Param('idUser', ParseIntPipe) idUser: number
@@ -137,7 +137,7 @@ export class TaskController {
         
     }
 
-    @Delete('/tags/:idTask/:idTag')
+    @Delete('/:idTask/tags/:idTag')
     async removeTagFromTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Param('idTag', ParseIntPipe) idTag: number
