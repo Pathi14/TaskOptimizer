@@ -34,7 +34,7 @@ export default function Page({
       axios
         .get<
           { id: number; nom: string; projetId: number }[]
-        >(`/status/status/project/${projectId}`)
+        >(`/status/project/${projectId}`)
         .then((res) =>
           res.data.map((status) => ({
             id: status.id,
