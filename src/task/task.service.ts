@@ -174,6 +174,38 @@ export class TaskService {
         },
     });
   }
+
+  async addTagToTask(taskId: number, tagsIds: number[]): Promise<void> {
+
+    if(taskId){
+        const existTask = this.verifyExistenceTask(taskId);
+        if (!existTask) {
+            throw new Error(`Task id ${taskId} invalid`);
+        }
+    }
+
+    for (const tagId of tagsIds) {
+      const tagExist = await this.verifExistenceTag(tagId);
+      if (!tagExist) {
+        throw new Error(`User with'ID ${tagId} doesn't exist`);
+      }
+      const alreadyAssociated = await this.checkTagTaskAssociation(taskId, tagId);
+      if (alreadyAssociated) {
+          throw new Error(`User with ID ${tagId} already has association with Task with ID ${taskId}`);
+      }
+    }
+
+    await Promise.all(
+      tagsIds.map((tagId) =>
+            this.prisma.posseder.create({
+                data: {
+                    id_tag: tagId,
+                    id_tache: taskId,
+                },
+            })
+        )
+    );
+  }
     
   private async verifExistenceUser(utilisateurId?: number | null): Promise<boolean> {
     if (!utilisateurId) return false;
@@ -207,6 +239,24 @@ export class TaskService {
       where: { id: statutId },
     });
     return !!status;
+  }
+
+  private async verifExistenceTag(tagId?: number | null): Promise<boolean> {
+    if (!tagId) return false;
+    const tag = await this.prisma.tag.findUnique({
+      where: { id: tagId },
+    });
+    return !!tag;
+  }
+
+  private async checkTagTaskAssociation(taskId: number, tagId: number): Promise<boolean> {
+    const associationExists = await this.prisma.posseder.findFirst({
+        where: {
+            id_tache: taskId,
+            id_tag: tagId,
+        },
+    });
+    return !!associationExists;    
   }
       
 }

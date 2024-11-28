@@ -3,7 +3,7 @@ import { StatusService } from './status.service';
 import { Statut } from '@prisma/client';
 import { CreateStatutDto } from './status.dto';
 
-@Controller('status')
+@Controller()
 export class StatutController {
   constructor(private readonly statusService: StatusService) {}
 
