@@ -2,7 +2,7 @@
 import { TaskCard } from '@/components/task-card';
 import { Button } from '@/components/ui/button';
 import { axios } from '@/lib/axios';
-import { Plus, Trash } from 'lucide-react';
+import { CheckIcon, Plus, Trash, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
@@ -11,15 +11,21 @@ import { useForm } from 'react-hook-form';
 import { Status, Task } from '@/lib/types';
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 const TaskSchema = z.object({
   title: z.string(),
   statusId: z.number().int().positive(),
 });
 
+const StatusSchema = z.object({
+  name: z.string().min(1),
+});
+
 export function TaskList({ status }: { status: Status }) {
   const queryClient = useQueryClient();
   const [isCreationModeEnabled, setCreationModeEnabled] = useState(false);
+  const [isEditModeEnabled, setEditModeEnabled] = useState(false);
   const { mutateAsync: addTask } = useMutation({
     mutationFn: (payload: Pick<Task, 'title' | 'statusId'>) =>
       axios
@@ -57,13 +63,32 @@ export function TaskList({ status }: { status: Status }) {
       statusId: Number(status.id),
     },
   });
+
+  const statusForm = useForm<z.infer<typeof StatusSchema>>({
+    resolver: zodResolver(StatusSchema),
+    values: {
+      name: status.name,
+    },
+  });
+
   const { mutateAsync: deleteStatus } = useMutation({
     mutationFn: (statusId: Status['id']) => axios.delete(`/status/${statusId}`),
+    onSettled: () => queryClient.invalidateQueries(['statuses']),
+  });
+  const { mutateAsync: updateStatus } = useMutation({
+    mutationFn: (payload: Pick<Status, 'name'>) =>
+      axios.put(`/status/${status.id}`, {
+        nom: payload.name,
+      }),
     onSettled: () => queryClient.invalidateQueries(['statuses']),
   });
 
   function toggleCreationMode() {
     setCreationModeEnabled(!isCreationModeEnabled);
+  }
+
+  function toggleEditMode() {
+    setEditModeEnabled(!isEditModeEnabled);
   }
 
   async function onSubmit(payload: z.infer<typeof TaskSchema>) {
@@ -78,6 +103,11 @@ export function TaskList({ status }: { status: Status }) {
     id: status.id,
   });
 
+  function onUpdateStatus(payload: z.infer<typeof StatusSchema>) {
+    updateStatus(payload);
+    toggleEditMode();
+  }
+
   return (
     <div
       className={cn(
@@ -86,7 +116,49 @@ export function TaskList({ status }: { status: Status }) {
       )}
     >
       <div className="flex justify-between items-center mb-7">
-        <h2 className="uppercase text-base">{status.name}</h2>
+        {' '}
+        <h2
+          className={cn(
+            'uppercase text-base cursor-pointer',
+            isEditModeEnabled && 'sr-only',
+          )}
+          onDoubleClick={toggleEditMode}
+        >
+          {status.name}
+        </h2>
+        {isEditModeEnabled && (
+          <form onSubmit={statusForm.handleSubmit(onUpdateStatus)}>
+            <Input
+              type="text"
+              className="bg-card-dark rounded-lg border-none"
+              autoComplete="off"
+              {...statusForm.register('name')}
+            />
+            <div className="mt-2">
+              <Button
+                type="submit"
+                className="mr-1"
+                size="icon"
+                disabled={
+                  !statusForm.formState.isValid ||
+                  statusForm.formState.isSubmitting ||
+                  !statusForm.formState.isDirty
+                }
+              >
+                <CheckIcon />
+              </Button>
+
+              <Button
+                type="reset"
+                variant="ghost"
+                onClick={toggleEditMode}
+                size="icon"
+              >
+                <XIcon />
+              </Button>
+            </div>
+          </form>
+        )}
         <Button
           variant="ghost"
           size="icon"
