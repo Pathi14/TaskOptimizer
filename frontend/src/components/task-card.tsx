@@ -1,8 +1,16 @@
 'use client';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   Popover,
@@ -10,6 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Tag } from '@/components/ui/tag';
+import { useUsers } from '@/hooks/use-users';
 import { axios } from '@/lib/axios';
 import { Task } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -21,8 +30,10 @@ import {
   CalendarIcon,
   CheckIcon,
   Clock,
+  Delete,
   Pencil,
   Plus,
+  Trash,
   WrapText,
   XIcon,
 } from 'lucide-react';
@@ -109,6 +120,8 @@ export function TaskCard({
 
   const formEndDate = taskForm.watch('endDate');
 
+  const { data: users } = useUsers();
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -121,7 +134,17 @@ export function TaskCard({
         >
           <div className="flex items-center justify-between">
             <h3 className="text-base">{title}</h3>
-            <Pencil className="size-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                alert('Delete');
+              }}
+            >
+              <Trash className="size-4" />
+            </Button>
           </div>
 
           {description && <WrapText className="mt-1 size-5" />}
@@ -185,24 +208,28 @@ export function TaskCard({
           )}
 
           <div className="flex">
-            <Avatar>
-              <AvatarImage src="https://i.pravatar.cc/150?img=30" />
-            </Avatar>
-            <Avatar className="-ml-3">
-              <AvatarImage src="https://i.pravatar.cc/150?img=52" />
-            </Avatar>
-            <Avatar className="-ml-3">
-              <AvatarImage src="https://i.pravatar.cc/150?img=62" />
-            </Avatar>
-            <Avatar className="-ml-3">
-              <AvatarImage src="https://i.pravatar.cc/153?img=64" />
-            </Avatar>
-            <Button
-              size="icon"
-              className="rounded-full -ml-3 z-50 bg-card-light hover:bg-card-light"
-            >
-              <Plus />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  className="rounded-full -ml-3 z-50 bg-card-light hover:bg-card-light"
+                >
+                  <Plus />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-card-dark rounded-lg text-foreground border-white/20 shadow-md">
+                {users?.map((user) => (
+                  <DropdownMenuItem key={user.id}>
+                    <Avatar>
+                      <AvatarFallback className="bg-card-light">
+                        {user.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </DialogHeader>
 

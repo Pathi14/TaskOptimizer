@@ -61,10 +61,45 @@ export default function Page({
   });
 
   const { mutateAsync: updateTask } = useMutation({
-    mutationFn: (payload: { taskId: Task['id']; statusId: Status['id'] }) =>
+    mutationFn: (payload: {
+      taskId: Task['id'];
+      sourceStatusId: Status['id'];
+      targetStatusId: Status['id'];
+    }) =>
       axios.put(`/tasks/${payload.taskId}`, {
-        statutId: payload.statusId,
+        statutId: payload.targetStatusId,
       }),
+    onMutate: async ({ sourceStatusId, targetStatusId, taskId }) => {
+      const previousSourceTasks = queryClient.getQueryData<Task[]>([
+        'tasks',
+        sourceStatusId,
+      ]);
+      const previousTargetTasks = queryClient.getQueryData<Task[]>([
+        'tasks',
+        targetStatusId,
+      ]);
+
+      await Promise.all([
+        queryClient.cancelQueries(['tasks', sourceStatusId]),
+        queryClient.cancelQueries(['tasks', targetStatusId]),
+      ]);
+
+      const movedTask = previousSourceTasks?.find((t) => t.id === taskId);
+
+      Promise.all([
+        queryClient.setQueryData<Task[]>(['tasks', sourceStatusId], (old) =>
+          old ? old.filter((t) => t.id !== taskId) : [],
+        ),
+        queryClient.setQueryData<Task[]>(['tasks', targetStatusId], (old) => {
+          if (!old) return [];
+          if (!movedTask) return [];
+
+          return [...old, movedTask];
+        }),
+      ]);
+
+      return { previousSourceTasks, previousTargetTasks };
+    },
   });
 
   const [isCreationModeEnabled, setCreationModeEnabled] = useState(false);
@@ -109,7 +144,8 @@ export default function Page({
 
             await updateTask({
               taskId: Number(taskId),
-              statusId: Number(targetStatusId),
+              sourceStatusId: Number(sourceStatusId),
+              targetStatusId: Number(targetStatusId),
             });
 
             Promise.all([
