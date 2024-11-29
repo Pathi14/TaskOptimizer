@@ -116,7 +116,7 @@ export class TaskController {
         }
     }
 
-    @Put('/tags/:idTask')
+    @Put('/:idTask/tags')
     async addTagToTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Body() body: { tagsIds: number[] }
