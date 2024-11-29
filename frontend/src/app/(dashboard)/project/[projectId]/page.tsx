@@ -25,10 +25,10 @@ export default function Page({
     projectId: string;
   }>;
 }) {
-  const [search, setSearch] = useState('');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('search') || '');
 
   const projectId = use(params).projectId;
 

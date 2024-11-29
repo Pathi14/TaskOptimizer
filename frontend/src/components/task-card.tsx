@@ -26,8 +26,10 @@ import { useDraggable } from '@dnd-kit/core';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   CalendarIcon,
+  Check,
   CheckIcon,
   Clock,
   Delete,
@@ -37,6 +39,7 @@ import {
   WrapText,
   XIcon,
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
@@ -51,15 +54,12 @@ const TaskUpdateSchema = z.object({
   description: z.string().optional(),
 });
 
-export function TaskCard({
-  task: { id, title, statusId, description, endDate },
-}: {
-  task: Task;
-}) {
+export function TaskCard({ task }: { task: Task }) {
   const [date, setDate] = React.useState<Date>();
+  const searchParams = useSearchParams();
   const [isNameEditable, setNameEditable] = React.useState(false);
   const { setNodeRef, listeners, attributes, transform } = useDraggable({
-    id: `${statusId}_${id}`,
+    id: `${task.statusId}_${task.id}`,
   });
   const style = transform
     ? {
@@ -76,15 +76,15 @@ export function TaskCard({
   const nameForm = useForm<z.infer<typeof NameUpdateSchema>>({
     resolver: zodResolver(NameUpdateSchema),
     values: {
-      title: title,
+      title: task.title,
     },
   });
 
   const taskForm = useForm<z.infer<typeof TaskUpdateSchema>>({
     resolver: zodResolver(TaskUpdateSchema),
     values: {
-      description,
-      endDate: endDate ? new Date(endDate) : undefined,
+      description: task.description,
+      endDate: task.endDate ? new Date(task.endDate) : undefined,
     },
   });
 
@@ -98,24 +98,25 @@ export function TaskCard({
   });
 
   const { mutateAsync: deleteTask } = useMutation({
-    mutationFn: ({
-      taskId,
-      statusId,
-    }: {
-      taskId: Task['id'];
-      statusId: Status['id'];
-    }) => axios.delete(`/tasks/${taskId}`),
-    onSettled: () => queryClient.invalidateQueries(['tasks', statusId]),
+    mutationFn: ({ taskId }: { taskId: Task['id']; statusId: Status['id'] }) =>
+      axios.delete(`/tasks/${taskId}`),
+    onSettled: () => queryClient.invalidateQueries(['tasks', task.statusId]),
     onMutate: async ({ taskId, statusId }) => {
       const previousTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         statusId,
+        searchParams.get('search'),
       ]);
 
-      await queryClient.cancelQueries(['tasks', statusId]);
+      await queryClient.cancelQueries([
+        'tasks',
+        statusId,
+        searchParams.get('search'),
+      ]);
 
-      queryClient.setQueryData<Task[]>(['tasks', statusId], (old) =>
-        old ? old.filter((t) => t.id !== taskId) : [],
+      queryClient.setQueryData<Task[]>(
+        ['tasks', statusId, searchParams.get('search')],
+        (old) => (old ? old.filter((t) => t.id !== taskId) : []),
       );
 
       return { previousTasks };
@@ -134,19 +135,28 @@ export function TaskCard({
         usersIds: [userId],
       }),
 
-    onSettled: () => queryClient.invalidateQueries(['tasks', statusId]),
+    onSettled: () =>
+      queryClient.invalidateQueries([
+        'tasks',
+        task.statusId,
+        searchParams.get('search'),
+      ]),
   });
 
   async function onUpdateName(data: z.infer<typeof NameUpdateSchema>) {
     toggleNameEditable();
-    await updateTask({ taskId: id, data });
+    await updateTask({ taskId: task.id, data });
     nameForm.reset();
-    queryClient.invalidateQueries(['tasks', statusId]);
+    queryClient.invalidateQueries([
+      'tasks',
+      task.statusId,
+      searchParams.get('search'),
+    ]);
   }
 
   async function onUpdateTask(data: z.infer<typeof TaskUpdateSchema>) {
     await updateTask({
-      taskId: id,
+      taskId: task.id,
       data: {
         description: data.description,
         endDate: data.endDate ? data.endDate.toISOString() : undefined,
@@ -155,7 +165,11 @@ export function TaskCard({
 
     taskForm.reset();
 
-    queryClient.invalidateQueries(['tasks', statusId]);
+    queryClient.invalidateQueries([
+      'tasks',
+      task.statusId,
+      searchParams.get('search'),
+    ]);
   }
 
   const formEndDate = taskForm.watch('endDate');
@@ -173,21 +187,40 @@ export function TaskCard({
           style={style}
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-base">{title}</h3>
+            <h3 className="text-base">{task.title}</h3>
             <Button
               variant="ghost"
               size="icon"
               className="rounded-full"
               onClick={(e) => {
                 e.stopPropagation();
-                deleteTask({ taskId: id, statusId });
+                deleteTask({ taskId: task.id, statusId: task.statusId });
               }}
             >
               <Trash className="size-4" />
             </Button>
           </div>
 
-          {description && <WrapText className="mt-1 size-5" />}
+          <div className="flex gap-1 mt-3">
+            {task.users.map((u) => (
+              <Avatar key={u.id} className="cursor-pointer" title={u.name}>
+                <AvatarFallback className="bg-card">{u.name[0]}</AvatarFallback>
+              </Avatar>
+            ))}
+          </div>
+
+          <div className="flex gap-5 mt-3 items-center">
+            {task.endDate && (
+              <div className="flex gap-3">
+                <Clock />{' '}
+                {format(task.endDate, fr.formatLong.date({ width: 'medium' }), {
+                  locale: fr,
+                })}
+              </div>
+            )}
+
+            {task.description && <WrapText className="size-5" />}
+          </div>
         </div>
       </DialogTrigger>
 
@@ -199,7 +232,9 @@ export function TaskCard({
               isNameEditable && 'sr-only',
             )}
           >
-            <DialogTitle className={cn('select-none')}>{title}</DialogTitle>
+            <DialogTitle className={cn('select-none')}>
+              {task.title}
+            </DialogTitle>
 
             <Button
               variant="ghost"
@@ -216,7 +251,7 @@ export function TaskCard({
               <Input
                 type="text"
                 className="bg-card-dark rounded-lg border-none"
-                defaultValue={title}
+                defaultValue={task.title}
                 autoComplete="off"
                 {...nameForm.register('title')}
               />
@@ -248,11 +283,23 @@ export function TaskCard({
           )}
 
           <div className="flex">
+            {task.users?.map((u) => (
+              <Avatar
+                key={u.id}
+                className="-ml-2 cursor-pointer border border-foreground"
+                title={u.name}
+              >
+                <AvatarFallback className="bg-card-light">
+                  {u.name[0]}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="icon"
-                  className="rounded-full -ml-3 z-50 bg-card-light hover:bg-card-light"
+                  className="rounded-full -ml-2 z-50 bg-blue-700 hover:bg-blue-800"
                 >
                   <Plus />
                 </Button>
@@ -262,7 +309,7 @@ export function TaskCard({
                   <DropdownMenuItem
                     key={user.id}
                     onClick={() => {
-                      assignTaskToUser({ taskId: id, userId: user.id });
+                      assignTaskToUser({ taskId: task.id, userId: user.id });
                     }}
                   >
                     <Avatar>
@@ -271,6 +318,10 @@ export function TaskCard({
                       </AvatarFallback>
                     </Avatar>
                     {user.name}
+
+                    {task.users.some((u) => u.id === user.id) && (
+                      <Check className="text-green-700 size-5" />
+                    )}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -311,9 +362,9 @@ export function TaskCard({
                   >
                     <CalendarIcon />
                     {formEndDate ? (
-                      format(formEndDate, 'PPP')
+                      format(formEndDate, 'PPP', { locale: fr })
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Choisir une date</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -323,6 +374,7 @@ export function TaskCard({
                     selected={date}
                     onSelect={(date) => taskForm.setValue('endDate', date)}
                     initialFocus
+                    locale={fr}
                   />
                 </PopoverContent>
               </Popover>

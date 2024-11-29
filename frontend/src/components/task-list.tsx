@@ -48,6 +48,13 @@ export function TaskList({ status }: { status: Status }) {
           statutId: number;
           description: string;
           date_echeance: string;
+          utilisateurs: {
+            utilisateur: {
+              id: number;
+              nom: string;
+              adresse_mail: string;
+            };
+          }[];
         }[]
       >(`/tasks/status/${status.id}`)
       .then((res) =>
@@ -58,6 +65,11 @@ export function TaskList({ status }: { status: Status }) {
             statusId: t.statutId,
             id: t.id,
             endDate: t.date_echeance,
+            users: t.utilisateurs.map((u) => ({
+              id: u.utilisateur.id,
+              name: u.utilisateur.nom,
+              email: u.utilisateur.adresse_mail,
+            })),
           }))
           .filter((t) =>
             !search
