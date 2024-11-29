@@ -98,8 +98,9 @@ export class TaskService {
         statutId: statusId,
       },
       include: {
+        utilisateurs: true,
         tags: true,
-      },
+      }
     });
   }
 
@@ -120,6 +121,7 @@ export class TaskService {
           where: { id },
           include: {
             tags: true,
+            utilisateurs: true,
           },
       });
   }
