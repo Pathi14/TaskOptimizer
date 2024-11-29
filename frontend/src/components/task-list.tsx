@@ -2,7 +2,7 @@
 import { TaskCard } from '@/components/task-card';
 import { Button } from '@/components/ui/button';
 import { axios } from '@/lib/axios';
-import { Plus } from 'lucide-react';
+import { Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
@@ -57,6 +57,10 @@ export function TaskList({ status }: { status: Status }) {
       statusId: Number(status.id),
     },
   });
+  const { mutateAsync: deleteStatus } = useMutation({
+    mutationFn: (statusId: Status['id']) => axios.delete(`/status/${statusId}`),
+    onSettled: () => queryClient.invalidateQueries(['statuses']),
+  });
 
   function toggleCreationMode() {
     setCreationModeEnabled(!isCreationModeEnabled);
@@ -81,7 +85,17 @@ export function TaskList({ status }: { status: Status }) {
         isOver && 'border-dashed border-card-light',
       )}
     >
-      <h2 className="mb-7 uppercase text-base">{status.name}</h2>
+      <div className="flex justify-between items-center mb-7">
+        <h2 className="uppercase text-base">{status.name}</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={() => deleteStatus(status.id)}
+        >
+          <Trash />
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-2 flex-1" ref={setNodeRef}>
         {tasks?.map((task) => (

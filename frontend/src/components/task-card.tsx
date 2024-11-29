@@ -20,7 +20,7 @@ import {
 import { Tag } from '@/components/ui/tag';
 import { useUsers } from '@/hooks/use-users';
 import { axios } from '@/lib/axios';
-import { Task } from '@/lib/types';
+import { Status, Task, User } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useDraggable } from '@dnd-kit/core';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -97,6 +97,46 @@ export function TaskCard({
       }),
   });
 
+  const { mutateAsync: deleteTask } = useMutation({
+    mutationFn: ({
+      taskId,
+      statusId,
+    }: {
+      taskId: Task['id'];
+      statusId: Status['id'];
+    }) => axios.delete(`/tasks/${taskId}`),
+    onSettled: () => queryClient.invalidateQueries(['tasks', statusId]),
+    onMutate: async ({ taskId, statusId }) => {
+      const previousTasks = queryClient.getQueryData<Task[]>([
+        'tasks',
+        statusId,
+      ]);
+
+      await queryClient.cancelQueries(['tasks', statusId]);
+
+      queryClient.setQueryData<Task[]>(['tasks', statusId], (old) =>
+        old ? old.filter((t) => t.id !== taskId) : [],
+      );
+
+      return { previousTasks };
+    },
+  });
+
+  const { mutateAsync: assignTaskToUser } = useMutation({
+    mutationFn: ({
+      taskId,
+      userId,
+    }: {
+      taskId: Task['id'];
+      userId: User['id'];
+    }) =>
+      axios.put(`/tasks/${taskId}/users`, {
+        usersIds: [userId],
+      }),
+
+    onSettled: () => queryClient.invalidateQueries(['tasks', statusId]),
+  });
+
   async function onUpdateName(data: z.infer<typeof NameUpdateSchema>) {
     toggleNameEditable();
     await updateTask({ taskId: id, data });
@@ -140,7 +180,7 @@ export function TaskCard({
               className="rounded-full"
               onClick={(e) => {
                 e.stopPropagation();
-                alert('Delete');
+                deleteTask({ taskId: id, statusId });
               }}
             >
               <Trash className="size-4" />
@@ -219,7 +259,12 @@ export function TaskCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-card-dark rounded-lg text-foreground border-white/20 shadow-md">
                 {users?.map((user) => (
-                  <DropdownMenuItem key={user.id}>
+                  <DropdownMenuItem
+                    key={user.id}
+                    onClick={() => {
+                      assignTaskToUser({ taskId: id, userId: user.id });
+                    }}
+                  >
                     <Avatar>
                       <AvatarFallback className="bg-card-light">
                         {user.name[0]}

@@ -11,7 +11,7 @@ export function useUsers() {
           nom: string;
           adresse_mail: string;
         }[]
-      >('/users/users')
+      >('/users')
       .then((res) =>
         res.data.map((u) => ({
           id: u.id,

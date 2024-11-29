@@ -16,7 +16,7 @@ export type Task = {
   description?: string;
   priority?: number;
   endDate?: string;
-  statusId?: number;
+  statusId: number;
 };
 
 export type User = {
