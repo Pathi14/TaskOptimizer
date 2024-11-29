@@ -17,6 +17,7 @@ export type Task = {
   priority?: number;
   endDate?: string;
   statusId: number;
+  users: User[];
 };
 
 export type User = {

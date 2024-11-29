@@ -12,6 +12,7 @@ import { Status, Task } from '@/lib/types';
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useSearchParams } from 'next/navigation';
 
 const TaskSchema = z.object({
   title: z.string(),
@@ -23,6 +24,8 @@ const StatusSchema = z.object({
 });
 
 export function TaskList({ status }: { status: Status }) {
+  const searchParams = useSearchParams();
+  const search = searchParams.get('search');
   const queryClient = useQueryClient();
   const [isCreationModeEnabled, setCreationModeEnabled] = useState(false);
   const [isEditModeEnabled, setEditModeEnabled] = useState(false);
@@ -36,7 +39,7 @@ export function TaskList({ status }: { status: Status }) {
         .then((res) => res.data)
         .catch(console.log),
   });
-  const { data: tasks } = useQuery<Task[]>(['tasks', status.id], () =>
+  const { data: tasks } = useQuery<Task[]>(['tasks', status.id, search], () =>
     axios
       .get<
         {
@@ -45,16 +48,37 @@ export function TaskList({ status }: { status: Status }) {
           statutId: number;
           description: string;
           date_echeance: string;
+          utilisateurs: {
+            utilisateur: {
+              id: number;
+              nom: string;
+              adresse_mail: string;
+            };
+          }[];
         }[]
       >(`/tasks/status/${status.id}`)
       .then((res) =>
-        res.data.map((t) => ({
-          title: t.titre,
-          description: t.description,
-          statusId: t.statutId,
-          id: t.id,
-          endDate: t.date_echeance,
-        })),
+        res.data
+          .map((t) => ({
+            title: t.titre,
+            description: t.description,
+            statusId: t.statutId,
+            id: t.id,
+            endDate: t.date_echeance,
+            users: t.utilisateurs.map((u) => ({
+              id: u.utilisateur.id,
+              name: u.utilisateur.nom,
+              email: u.utilisateur.adresse_mail,
+            })),
+          }))
+          .filter((t) =>
+            !search
+              ? true
+              : t.title
+                  .trim()
+                  .toLocaleLowerCase()
+                  .includes(search.trim().toLocaleLowerCase()),
+          ),
       ),
   );
   const form = useForm<z.infer<typeof TaskSchema>>({

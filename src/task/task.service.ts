@@ -97,8 +97,24 @@ export class TaskService {
         statutId: statusId,
       },
       include: {
-        utilisateurs: true,
-        tags: true,
+        utilisateurs: {
+          include: {
+            utilisateur: 
+              {
+                select: {
+                  id: true,
+                  nom: true,
+                  adresse_mail: true,
+                  mot_de_passe: false,
+                }, 
+              },
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
       }
     });
   }
@@ -119,8 +135,24 @@ export class TaskService {
       return this.prisma.tache.findUnique({
           where: { id },
           include: {
-            tags: true,
-            utilisateurs: true,
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+            utilisateurs: {
+              include: {
+                utilisateur: 
+                  {
+                    select: {
+                      id: true,
+                      nom: true,
+                      adresse_mail: true,
+                      mot_de_passe: false,
+                    }, 
+                  },
+              },
+            },
           },
       });
   }
