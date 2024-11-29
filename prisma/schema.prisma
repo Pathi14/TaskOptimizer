@@ -23,11 +23,11 @@ model Tache {
   date_creation DateTime   @default(now())
   date_echeance DateTime?
   priorite      Int?
-  sousTache     Tache?     @relation("ParentChildRelation", fields: [sous_tache], references: [id])
+  sousTache     Tache?     @relation("ParentChildRelation", fields: [sous_tache], references: [id], onDelete: Cascade)
   sous_tache    Int?
   sousTaches    Tache[]    @relation("ParentChildRelation")
   evolution     Int?
-  statut        Statut     @relation(fields: [statutId], references: [id])
+  statut        Statut     @relation(fields: [statutId], references: [id], onDelete: Cascade)
   statutId      Int
   utilisateurs  Affecter[]
   tags          Posseder[]
@@ -44,7 +44,7 @@ model Projet {
 model Statut {
   id       Int     @id @default(autoincrement())
   nom      String
-  projet   Projet  @relation(fields: [projetId], references: [id])
+  projet   Projet  @relation(fields: [projetId], references: [id], onDelete: Cascade)
   projetId Int
   taches   Tache[]
 }
@@ -59,7 +59,7 @@ model Affecter {
   id             Int         @id @default(autoincrement())
   utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id])
   id_utilisateur Int
-  tache          Tache       @relation(fields: [id_tache], references: [id])
+  tache          Tache       @relation(fields: [id_tache], references: [id], onDelete: Cascade)
   id_tache       Int
 }
 
@@ -67,14 +67,14 @@ model Associer {
   id             Int         @id @default(autoincrement())
   utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id])
   id_utilisateur Int
-  projet         Projet      @relation(fields: [id_projet], references: [id])
+  projet         Projet      @relation(fields: [id_projet], references: [id], onDelete: Cascade)
   id_projet      Int
 }
 
 model Posseder {
   id       Int   @id @default(autoincrement())
-  tag      Tag   @relation(fields: [id_tag], references: [id])
+  tag      Tag   @relation(fields: [id_tag], references: [id], onDelete: Cascade)
   id_tag   Int
-  tache    Tache @relation(fields: [id_tache], references: [id])
+  tache    Tache @relation(fields: [id_tache], references: [id], onDelete: Cascade)
   id_tache Int
 }

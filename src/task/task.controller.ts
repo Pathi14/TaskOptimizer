@@ -29,7 +29,7 @@ export class TaskController {
     }
 
     @Get('status/:id')
-    async getStatusByStatusId(@Param('id', ParseIntPipe) id: number): Promise<Tache[]> {
+    async getTacheByStatusId(@Param('id', ParseIntPipe) id: number): Promise<Tache[]> {
         return this.taskService.getTacheByStatusId(id);
     }
     
