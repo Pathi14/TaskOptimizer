@@ -87,26 +87,34 @@ Fonctionnalités choisies pour la version initiale du projet :
   ```bash
   git clone https://github.com/Pathi14/TaskOptimizer.git
   cd TaskOptimizer
+  ```
 
 
 2. **Installez les dépendances** :
-  ```bash
   Backend :
+  ```bash
   npm install
+  ```
 
   Frontend :
+  ```bash
   npm run start
-
+  ```
 
 3. **Lancez le projet** :
-  ```bash
+  
   Backend :
+  ```bash
   npm install
+  ```
 
   Frontend :
+  ```bash
   npm run start
+  ```
 
 
 4. **Accédez à l’application dans votre navigateur à l’adresse** :
-   ```bash
-    http://localhost:3000
+  ```bash
+  http://localhost:3001
+  ```
