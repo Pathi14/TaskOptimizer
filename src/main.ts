@@ -22,6 +22,5 @@ async function bootstrap() {
       };
     });
 
-  Logger.log(availableRoutes);
 }
 bootstrap();
