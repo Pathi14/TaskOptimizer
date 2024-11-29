@@ -13,7 +13,7 @@ Chaque tâche peut inclure :
 - Un **titre** et une **description** détaillée.  
 - Un **projet d’appartenance**.  
 - Une **date de création** et une **date d’échéance**.  
-- Une **priorité**, un **statut**, et des **tags**.  
+- Une **priorité**, un **statut**, une **évolution** et des **tags**.  
 - Une possibilité de **décomposition en sous-tâches** avec une hiérarchie sans limite.
 
 ---
@@ -47,13 +47,14 @@ Chaque tâche peut inclure :
 
 Fonctionnalités choisies pour la version initiale du projet :
 
- - Créer une tâche avec un titre, une description, une date de fin et une date de début
- - Afficher la liste des tâches
- - Afficher les détails d'une tâche
- - Deplacer une tâche suivant les differents status
- - Supprimer une tâche
- - Trier les tâches (selon leur priorité, statut, date de fin)
- - Modifier une tâche
+  - S’authentifier
+  - Créer un projet
+  - Créer, modifier, supprimer, lire une liste (status) 
+  - Créer, modifier, supprimer, lire une tâche avec un titre, une description, une date de fin et une date de  création avec status
+  - Afficher la liste des tâches
+  - Afficher les détails d'une tâche
+  - Déplacer une tâche suivant les différents status
+
 
 ---
 
