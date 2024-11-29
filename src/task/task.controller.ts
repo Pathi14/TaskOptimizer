@@ -1,9 +1,11 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Tache } from '@prisma/client';
 import { CreateTaskDto } from './task.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class TaskController {
     constructor(private readonly taskService: TaskService) {}
 
@@ -72,7 +74,7 @@ export class TaskController {
         return this.taskService.getTaskById(id);
     }
 
-    @Put('/users/:idTask')
+    @Put('/:idTask/users')
     async addUsersToTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Body() body: { usersIds: number[] }
@@ -95,7 +97,7 @@ export class TaskController {
         
     }
 
-    @Delete('/users/:idTask/:idUser')
+    @Delete('/:idTask/users/:idUser')
     async removeUserFromTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Param('idUser', ParseIntPipe) idUser: number
@@ -137,7 +139,7 @@ export class TaskController {
         
     }
 
-    @Delete('/tags/:idTask/:idTag')
+    @Delete('/:idTask/tags/:idTag')
     async removeTagFromTask(
         @Param('idTask', ParseIntPipe) idTask: number,
         @Param('idTag', ParseIntPipe) idTag: number

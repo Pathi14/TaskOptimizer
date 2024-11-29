@@ -1,9 +1,11 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { Prisma, Projet } from '@prisma/client';
 import { CreateProjectDto } from './project.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
+@UseGuards(AuthGuard('jwt'))
 export class ProjetController {
 
     constructor(private readonly projectService: ProjectService) {}
@@ -74,7 +76,7 @@ export class ProjetController {
         return this.projectService.getProjectbyId(id);
     }
 
-    @Put('/users/:idProject')
+    @Put('/:idProject/users')
     async addUsersToProjet(
         @Param('idProject', ParseIntPipe) idProject: number,
         @Body() body: { usersIds: number[] }
@@ -97,7 +99,7 @@ export class ProjetController {
         
     }
 
-    @Delete('/users/:idProject/:idUser')
+    @Delete('/:idProject/users/:idUser')
     async removeUserFromProjet(
         @Param('idProject', ParseIntPipe) idProject: number,
         @Param('idUser', ParseIntPipe) idUser: number
