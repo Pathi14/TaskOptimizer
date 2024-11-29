@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
 import { Utilisateur, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
@@ -21,28 +21,28 @@ export class UserService {
 
   async createUser(
     data: Prisma.UtilisateurCreateInput,
-  ): Promise<{ accessToken: string; user: Utilisateur }> {
+  ): Promise<{ accessToken: string; user: { id: number; nom: string } }> {
     const existingUser = await this.prisma.utilisateur.findUnique({
       where: { adresse_mail: data.adresse_mail },
     });
-
+  
     if (existingUser) {
       throw new ConflictException('Adresse e-mail déjà utilisée');
     }
-
+  
     const hashedPassword = await bcrypt.hash(data.mot_de_passe, 10);
     data.mot_de_passe = hashedPassword;
-
+  
     const user = await this.prisma.utilisateur.create({
       data,
     });
-
+  
     const payload = { userId: user.id };
     const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken, user };
+  
+    return { accessToken, user: { id: user.id, nom: user.nom } };
   }
-
+  
   async getUser(id: number): Promise<Utilisateur | null> {
     return this.prisma.utilisateur.findUnique({
       where: { id },
@@ -91,23 +91,25 @@ export class UserService {
     });
     return !!user;
   }
+  
+  
   async authenticateUser(
     authDto: AuthDto,
-  ): Promise<{ accessToken: string; user: any }> {
+  ): Promise<{ accessToken: string; user: { id: number; nom: string } }> {
     const { adresse_mail, mot_de_passe } = authDto;
     const user = await this.prisma.utilisateur.findUnique({
       where: { adresse_mail },
     });
-
+  
     if (!user || !(await bcrypt.compare(mot_de_passe, user.mot_de_passe))) {
       throw new UnauthorizedException(
         'Adresse e-mail ou mot de passe incorrect',
       );
     }
-
+  
     const payload = { userId: user.id };
     const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken, user };
+  
+    return { accessToken, user: { id: user.id, nom: user.nom } };
   }
 }

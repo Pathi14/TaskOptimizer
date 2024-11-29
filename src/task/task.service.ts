@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Tache } from '@prisma/client';
-import { EmailService } from 'src/email/email.service';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class TaskService {
 
   constructor(
     private prisma: PrismaService,
-    private emailService: EmailService,
+
   ) {}
     
   async addTask(data : {
