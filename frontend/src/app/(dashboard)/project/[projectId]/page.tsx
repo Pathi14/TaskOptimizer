@@ -6,11 +6,12 @@ import { axios } from '@/lib/axios';
 import { Status, Task } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ListFilter, Plus } from 'lucide-react';
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { z } from 'zod';
 import { DndContext, PointerSensor, useSensor } from '@dnd-kit/core';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const StatusSchema = z.object({
   name: z.string().min(1),
@@ -24,6 +25,11 @@ export default function Page({
     projectId: string;
   }>;
 }) {
+  const [search, setSearch] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const projectId = use(params).projectId;
 
   const queryClient = useQueryClient();
@@ -73,29 +79,43 @@ export default function Page({
       const previousSourceTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         sourceStatusId,
+        searchParams.get('search'),
       ]);
       const previousTargetTasks = queryClient.getQueryData<Task[]>([
         'tasks',
         targetStatusId,
+        searchParams.get('search'),
       ]);
 
       await Promise.all([
-        queryClient.cancelQueries(['tasks', sourceStatusId]),
-        queryClient.cancelQueries(['tasks', targetStatusId]),
+        queryClient.cancelQueries([
+          'tasks',
+          sourceStatusId,
+          searchParams.get('search'),
+        ]),
+        queryClient.cancelQueries([
+          'tasks',
+          targetStatusId,
+          searchParams.get('search'),
+        ]),
       ]);
 
       const movedTask = previousSourceTasks?.find((t) => t.id === taskId);
 
       Promise.all([
-        queryClient.setQueryData<Task[]>(['tasks', sourceStatusId], (old) =>
-          old ? old.filter((t) => t.id !== taskId) : [],
+        queryClient.setQueryData<Task[]>(
+          ['tasks', sourceStatusId, searchParams.get('search')],
+          (old) => (old ? old.filter((t) => t.id !== taskId) : []),
         ),
-        queryClient.setQueryData<Task[]>(['tasks', targetStatusId], (old) => {
-          if (!old) return [];
-          if (!movedTask) return [];
+        queryClient.setQueryData<Task[]>(
+          ['tasks', targetStatusId, searchParams.get('search')],
+          (old) => {
+            if (!old) return [];
+            if (!movedTask) return [];
 
-          return [...old, movedTask];
-        }),
+            return [...old, movedTask];
+          },
+        ),
       ]);
 
       return { previousSourceTasks, previousTargetTasks };
@@ -121,6 +141,24 @@ export default function Page({
     },
   });
 
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | null = null;
+
+    if (timeout) clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+      if (search) {
+        router.push(`${pathname}?search=${search}`);
+      } else {
+        router.push(pathname);
+      }
+    }, 500);
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [search]);
+
   return (
     <>
       <div className="relative">
@@ -128,15 +166,16 @@ export default function Page({
         <Input
           className="bg-card-light border-none max-w-96 pl-11 placeholder:text-white/40"
           placeholder="Rechercher dans les tâches"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      <div className="mt-5 flex items-start gap-3 overflow-auto">
+      <div className="mt-5 flex items-start gap-3 overflow-auto p-1">
         {isLoading && <div>Chargement...</div>}
 
         <DndContext
           onDragEnd={async (event) => {
-            console.log(event);
             const [sourceStatusId, taskId] = String(event.active.id).split('_');
             const targetStatusId = event.over?.id;
 
@@ -149,8 +188,16 @@ export default function Page({
             });
 
             Promise.all([
-              queryClient.invalidateQueries(['tasks', Number(targetStatusId)]),
-              queryClient.invalidateQueries(['tasks', Number(sourceStatusId)]),
+              queryClient.invalidateQueries([
+                'tasks',
+                Number(targetStatusId),
+                searchParams.get('search'),
+              ]),
+              queryClient.invalidateQueries([
+                'tasks',
+                Number(sourceStatusId),
+                searchParams.get('search'),
+              ]),
             ]);
           }}
           sensors={[sensor]}
@@ -166,6 +213,7 @@ export default function Page({
             <Input
               type="text"
               className="bg-card border-none min-w-80 w-80 h-1s4 rounded-lg"
+              autoComplete="off"
               autoFocus
               {...form.register('name')}
             />
